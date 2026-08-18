@@ -1,21 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-type Player = {
-  id: number;
+type RobloxPlayer = {
+  userId: number;
   username: string;
   displayName: string;
-  risk: number;
-  flags: number;
+  accountAge?: number;
+  avatarUrl?: string;
 };
 
-const players: Player[] = [
-  { id: 10, username: "FlameDrift", displayName: "FlameDrift", risk: 95, flags: 0 },
-  { id: 8, username: "IceVenom", displayName: "IceVenom", risk: 78, flags: 0 },
-  { id: 6, username: "ShadowBlitz", displayName: "ShadowBlitz", risk: 67, flags: 0 },
-  { id: 5, username: "RazeEffect", displayName: "RazeEffect", risk: 15, flags: 3 },
-];
+type ServerInfo = {
+  serverId: string;
+  placeId: number;
+  gameId: number;
+  playerCount: number;
+  maxPlayers: number;
+  lastSeen: number;
+};
+
+type PlayersApiResponse = {
+  success: boolean;
+  online: boolean;
+  server: ServerInfo | null;
+  players: RobloxPlayer[];
+};
+
+type ThumbnailApiResponse = {
+  data?: Array<{
+    targetId: number;
+    state: string;
+    imageUrl?: string;
+  }>;
+};
 
 const menu = [
   "Dashboard",
@@ -32,124 +49,278 @@ const menu = [
 
 export default function Home() {
   const [activePage, setActivePage] = useState("Live Monitor");
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+
+  const [players, setPlayers] = useState<RobloxPlayer[]>([]);
+  const [server, setServer] = useState<ServerInfo | null>(null);
+  const [serverOnline, setServerOnline] = useState(false);
+
+  const [selectedPlayer, setSelectedPlayer] =
+    useState<RobloxPlayer | null>(null);
+
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const filteredPlayers = players.filter((player) =>
-    player.username.toLowerCase().includes(search.toLowerCase())
-  );
+  async function getAvatar(userId: number) {
+    try {
+      const response = await fetch(
+        `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`
+      );
 
-  function renderPage() {
-    if (activePage === "Dashboard") {
+      if (!response.ok) {
+        return null;
+      }
+
+      const data: ThumbnailApiResponse = await response.json();
+
+      return data.data?.[0]?.imageUrl ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function addAvatars(rawPlayers: RobloxPlayer[]) {
+    return Promise.all(
+      rawPlayers.map(async (player) => {
+        const avatarUrl = await getAvatar(player.userId);
+
+        return {
+          ...player,
+          avatarUrl: avatarUrl ?? undefined,
+        };
+      })
+    );
+  }
+
+  async function loadPlayers() {
+    try {
+      const response = await fetch("/api/roblox/players", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data: PlayersApiResponse = await response.json();
+
+      const rawPlayers = Array.isArray(data.players)
+        ? data.players
+        : [];
+
+      const playersWithAvatars = await addAvatars(rawPlayers);
+
+      setPlayers(playersWithAvatars);
+      setServer(data.server ?? null);
+      setServerOnline(Boolean(data.online));
+      setLoading(false);
+
+      setSelectedPlayer((currentPlayer) => {
+        if (!currentPlayer) {
+          return null;
+        }
+
+        return (
+          playersWithAvatars.find(
+            (player) => player.userId === currentPlayer.userId
+          ) ?? null
+        );
+      });
+    } catch (error) {
+      console.error(
+        "[SantionV Panel] Players could not be loaded:",
+        error
+      );
+
+      setPlayers([]);
+      setServer(null);
+      setServerOnline(false);
+      setSelectedPlayer(null);
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadPlayers();
+
+    const interval = window.setInterval(() => {
+      loadPlayers();
+    }, 5000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  const filteredPlayers = players.filter((player) => {
+    const query = search.toLowerCase();
+
+    return (
+      player.username.toLowerCase().includes(query) ||
+      player.displayName.toLowerCase().includes(query) ||
+      String(player.userId).includes(query)
+    );
+  });
+
+  function renderAvatar(
+    player: RobloxPlayer,
+    className: string
+  ) {
+    if (player.avatarUrl) {
       return (
-        <div className="modulePage">
-          <div className="statsGrid">
-            <div className="statCard">
-              <span>PLAYERS ONLINE</span>
-              <strong>4</strong>
-              <small>Current server</small>
-            </div>
-
-            <div className="statCard">
-              <span>ACTIVE ADMINS</span>
-              <strong>2</strong>
-              <small>Staff online</small>
-            </div>
-
-            <div className="statCard">
-              <span>TOTAL BANS</span>
-              <strong>23</strong>
-              <small>Stored bans</small>
-            </div>
-
-            <div className="statCard">
-              <span>SERVER STATUS</span>
-              <strong className="greenText">ONLINE</strong>
-              <small>Roblox server</small>
-            </div>
-          </div>
-
-          <div className="largePanel">
-            <h2>Server Overview</h2>
-            <p>
-              This dashboard will show live Roblox server information when the
-              backend connection is completed.
-            </p>
-          </div>
-        </div>
+        <img
+          src={player.avatarUrl}
+          alt={player.username}
+          className={className}
+        />
       );
     }
 
-    if (activePage === "Configuration") {
-      return (
-        <div className="modulePage">
-          <div className="largePanel">
-            <h2>Server Configuration</h2>
+    return (
+      <div className={className}>
+        {player.username.charAt(0).toUpperCase()}
+      </div>
+    );
+  }
 
-            <div className="settingRow">
-              <div>
-                <strong>Server Lock</strong>
-                <span>Prevent new players from joining.</span>
-              </div>
+  function renderDashboard() {
+    return (
+      <div className="modulePage">
+        <div className="statsGrid">
+          <div className="statCard">
+            <span>PLAYERS ONLINE</span>
+            <strong>{server?.playerCount ?? 0}</strong>
+            <small>Current Roblox server</small>
+          </div>
 
-              <button className="greenButton">Enable</button>
-            </div>
+          <div className="statCard">
+            <span>MAX PLAYERS</span>
+            <strong>{server?.maxPlayers ?? 0}</strong>
+            <small>Server capacity</small>
+          </div>
 
-            <div className="settingRow">
-              <div>
-                <strong>Maintenance Mode</strong>
-                <span>Put the Roblox server into maintenance.</span>
-              </div>
+          <div className="statCard">
+            <span>PLACE ID</span>
+            <strong className="smallStat">
+              {server?.placeId ?? "-"}
+            </strong>
+            <small>Roblox Place</small>
+          </div>
 
-              <button>Disabled</button>
-            </div>
+          <div className="statCard">
+            <span>SERVER STATUS</span>
 
-            <div className="settingRow">
-              <div>
-                <strong>Anti-Cheat Logging</strong>
-                <span>Send detected activity to the web panel.</span>
-              </div>
+            <strong
+              className={
+                serverOnline ? "greenText" : "redText"
+              }
+            >
+              {serverOnline ? "ONLINE" : "OFFLINE"}
+            </strong>
 
-              <button className="greenButton">Enabled</button>
-            </div>
+            <small>Heartbeat status</small>
           </div>
         </div>
-      );
-    }
 
-    if (activePage === "Players") {
-      return (
-        <div className="modulePage">
-          <div className="largePanel">
-            <div className="panelHeading">
-              <div>
-                <h2>Players</h2>
-                <p>Players currently connected to the Roblox server.</p>
+        <div className="largePanel">
+          <h2>Server Overview</h2>
+
+          {serverOnline && server ? (
+            <>
+              <p>
+                SantionV Roblox server is connected to the web panel.
+              </p>
+
+              <div className="serverDetails">
+                <div>
+                  <span>Server ID</span>
+                  <strong>{server.serverId}</strong>
+                </div>
+
+                <div>
+                  <span>Game ID</span>
+                  <strong>{server.gameId}</strong>
+                </div>
+
+                <div>
+                  <span>Players</span>
+                  <strong>
+                    {server.playerCount} / {server.maxPlayers}
+                  </strong>
+                </div>
               </div>
+            </>
+          ) : (
+            <p>No active Roblox server heartbeat.</p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-              <input
-                className="normalInput"
-                placeholder="Search player..."
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
+  function renderPlayers() {
+    return (
+      <div className="modulePage">
+        <div className="largePanel">
+          <div className="panelHeading">
+            <div>
+              <h2>Players</h2>
+              <p>
+                Real players currently connected to the Roblox server.
+              </p>
             </div>
 
+            <input
+              className="normalInput"
+              placeholder="Search player..."
+              value={search}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
+            />
+          </div>
+
+          {loading ? (
+            <div className="panelMessage">
+              Loading players...
+            </div>
+          ) : !serverOnline ? (
+            <div className="panelMessage">
+              Roblox server is offline.
+            </div>
+          ) : filteredPlayers.length === 0 ? (
+            <div className="panelMessage">
+              No players found.
+            </div>
+          ) : (
             <div className="table">
               <div className="tableHead">
                 <span>PLAYER</span>
-                <span>SERVER ID</span>
-                <span>RISK</span>
-                <span>FLAGS</span>
+                <span>USER ID</span>
+                <span>DISPLAY NAME</span>
+                <span>ACCOUNT AGE</span>
                 <span>ACTION</span>
               </div>
 
               {filteredPlayers.map((player) => (
-                <div className="tableRow" key={player.id}>
-                  <span>{player.username}</span>
-                  <span>#{player.id}</span>
-                  <span>{player.risk}%</span>
-                  <span>{player.flags}</span>
+                <div
+                  className="tableRow"
+                  key={player.userId}
+                >
+                  <span className="tablePlayer">
+                    {renderAvatar(
+                      player,
+                      "tablePlayerAvatar"
+                    )}
+
+                    {player.username}
+                  </span>
+
+                  <span>{player.userId}</span>
+                  <span>{player.displayName}</span>
+
+                  <span>
+                    {player.accountAge ?? 0} days
+                  </span>
 
                   <span>
                     <button
@@ -165,134 +336,200 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function renderLiveMonitor() {
+    return (
+      <div className="monitor">
+        <div className="monitorMain">
+          <div className="monitorToolbar">
+            <select
+              value={selectedPlayer?.userId ?? ""}
+              onChange={(event) => {
+                const userId = Number(event.target.value);
+
+                setSelectedPlayer(
+                  players.find(
+                    (player) => player.userId === userId
+                  ) ?? null
+                );
+              }}
+            >
+              <option value="">Select Player...</option>
+
+              {players.map((player) => (
+                <option
+                  value={player.userId}
+                  key={player.userId}
+                >
+                  {player.username}
+                </option>
+              ))}
+            </select>
+
+            <button
+              className="greenButton"
+              onClick={() => {
+                if (!selectedPlayer && players.length > 0) {
+                  setSelectedPlayer(players[0]);
+                }
+              }}
+            >
+              Start Watch
+            </button>
+
+            <button onClick={loadPlayers}>
+              Refresh
+            </button>
+
+            <button className="yellowButton">
+              Watch Admins
+            </button>
+
+            <button
+              className="redButton"
+              onClick={() => setSelectedPlayer(null)}
+            >
+              Stop All
+            </button>
+
+            <span className="ready">
+              Players ready: <b>{players.length}</b>
+            </span>
+          </div>
+
+          <div className="watchArea">
+            {!serverOnline ? (
+              <div className="emptyState">
+                <div className="radar">
+                  <div className="radarDot offlineDot" />
+                </div>
+
+                <h2>Server Offline</h2>
+                <p>Waiting for Roblox heartbeat.</p>
+              </div>
+            ) : selectedPlayer ? (
+              <div className="selectedCard">
+                {renderAvatar(
+                  selectedPlayer,
+                  "selectedAvatar selectedAvatarImage"
+                )}
+
+                <p>NOW WATCHING</p>
+
+                <h2>{selectedPlayer.username}</h2>
+
+                <span className="displayNameText">
+                  {selectedPlayer.displayName}
+                </span>
+
+                <div className="selectedStats">
+                  <div>
+                    <span>USER ID</span>
+                    <strong>
+                      {selectedPlayer.userId}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>ACCOUNT AGE</span>
+                    <strong>
+                      {selectedPlayer.accountAge ?? 0}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>STATUS</span>
+                    <strong className="greenText">
+                      ONLINE
+                    </strong>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="emptyState">
+                <div className="radar">
+                  <div className="radarDot" />
+                </div>
+
+                <h2>Live Monitor</h2>
+
+                <p>
+                  Select a real Roblox player to start
+                  monitoring.
+                </p>
+              </div>
+            )}
           </div>
         </div>
-      );
-    }
 
-    if (activePage === "Live Monitor") {
-      return (
-        <div className="monitor">
-          <div className="monitorMain">
-            <div className="monitorToolbar">
-              <select
-                value={selectedPlayer?.id ?? ""}
-                onChange={(event) => {
-                  const id = Number(event.target.value);
+        <aside className="playerPanel">
+          <div className="playerSearch">
+            <input
+              placeholder="Search player..."
+              value={search}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
+            />
 
-                  setSelectedPlayer(
-                    players.find((player) => player.id === id) ?? null
-                  );
-                }}
-              >
-                <option value="">Select Player...</option>
+            <div className="serverConnection">
+              <span
+                className={
+                  serverOnline
+                    ? "connectionDot"
+                    : "connectionDot offline"
+                }
+              />
 
-                {players.map((player) => (
-                  <option value={player.id} key={player.id}>
-                    {player.username}
-                  </option>
-                ))}
-              </select>
-
-              <button className="greenButton">Start Watch</button>
-              <button>Recently Connected</button>
-              <button className="yellowButton">Watch Admins</button>
-              <button className="redButton">Stop All</button>
-
-              <span className="ready">
-                Players ready: <b>{players.length}</b>
-              </span>
-            </div>
-
-            <div className="watchArea">
-              {selectedPlayer ? (
-                <div className="selectedCard">
-                  <div className="selectedAvatar">
-                    {selectedPlayer.username.charAt(0)}
-                  </div>
-
-                  <p>NOW WATCHING</p>
-                  <h2>{selectedPlayer.username}</h2>
-
-                  <div className="selectedStats">
-                    <div>
-                      <span>SERVER ID</span>
-                      <strong>{selectedPlayer.id}</strong>
-                    </div>
-
-                    <div>
-                      <span>RISK SCORE</span>
-                      <strong>{selectedPlayer.risk}%</strong>
-                    </div>
-
-                    <div>
-                      <span>FLAGS</span>
-                      <strong>{selectedPlayer.flags}</strong>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="emptyState">
-                  <div className="radar">
-                    <div className="radarDot" />
-                  </div>
-
-                  <h2>Live Monitor</h2>
-
-                  <p>
-                    Select a Roblox player and press Start Watch to begin
-                    monitoring.
-                  </p>
-                </div>
-              )}
+              {serverOnline
+                ? "Roblox server connected"
+                : "Roblox server offline"}
             </div>
           </div>
 
-          <aside className="playerPanel">
-            <div className="playerSearch">
-              <input
-                placeholder="Search player..."
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-
-              <label>
-                <input type="checkbox" />
-                Show Only Dangerous
-              </label>
-            </div>
-
-            <div className="playerList">
-              {filteredPlayers.map((player) => (
+          <div className="playerList">
+            {loading ? (
+              <div className="playerPanelMessage">
+                Loading...
+              </div>
+            ) : filteredPlayers.length === 0 ? (
+              <div className="playerPanelMessage">
+                No online players.
+              </div>
+            ) : (
+              filteredPlayers.map((player) => (
                 <div
-                  className="playerCard"
-                  key={player.id}
-                  onClick={() => setSelectedPlayer(player)}
+                  className={
+                    selectedPlayer?.userId === player.userId
+                      ? "playerCard selectedPlayerRow"
+                      : "playerCard"
+                  }
+                  key={player.userId}
+                  onClick={() =>
+                    setSelectedPlayer(player)
+                  }
                 >
-                  <div className="playerAvatar">
-                    {player.username.charAt(0)}
-                  </div>
+                  {renderAvatar(
+                    player,
+                    "playerAvatar playerAvatarImage"
+                  )}
 
                   <div className="playerInfo">
                     <div className="playerName">
                       <strong>{player.username}</strong>
-                      <span>[{player.id}]</span>
                     </div>
 
-                    <div
-                      className={
-                        player.risk <= 30 ? "risk dangerous" : "risk safe"
-                      }
-                    >
-                      SCORE: {player.risk}%
+                    <div className="realPlayerId">
+                      ID: {player.userId}
                     </div>
 
-                    <div
-                      className={
-                        player.flags > 0 ? "flags dangerFlags" : "flags"
-                      }
-                    >
-                      ● {player.flags} CHEAT FLAGS
+                    <div className="flags">
+                      ● ONLINE
                     </div>
                   </div>
 
@@ -306,164 +543,64 @@ export default function Home() {
                     WATCH
                   </button>
                 </div>
-              ))}
-            </div>
-          </aside>
-        </div>
-      );
-    }
-
-    if (activePage === "Interactive Map") {
-      return (
-        <div className="modulePage">
-          <div className="largePanel mapPanel">
-            <div className="mapGrid">
-              <span className="mapPlayer mapPlayer1">● FlameDrift</span>
-              <span className="mapPlayer mapPlayer2">● IceVenom</span>
-              <span className="mapPlayer mapPlayer3">● ShadowBlitz</span>
-            </div>
+              ))
+            )}
           </div>
+        </aside>
+      </div>
+    );
+  }
+
+  function renderPlaceholder(title: string) {
+    return (
+      <div className="modulePage">
+        <div className="largePanel">
+          <h2>{title}</h2>
+
+          <p>
+            This module will be connected to the SantionV
+            Roblox backend next.
+          </p>
         </div>
-      );
+      </div>
+    );
+  }
+
+  function renderPage() {
+    switch (activePage) {
+      case "Dashboard":
+        return renderDashboard();
+
+      case "Players":
+        return renderPlayers();
+
+      case "Live Monitor":
+        return renderLiveMonitor();
+
+      case "Configuration":
+        return renderPlaceholder("Configuration");
+
+      case "Interactive Map":
+        return renderPlaceholder("Interactive Map");
+
+      case "Console":
+        return renderPlaceholder("Console");
+
+      case "Lookup":
+        return renderPlaceholder("Lookup");
+
+      case "Vehicles":
+        return renderPlaceholder("Vehicles");
+
+      case "Bans":
+        return renderPlaceholder("Bans");
+
+      case "Admins":
+        return renderPlaceholder("Admins");
+
+      default:
+        return renderLiveMonitor();
     }
-
-    if (activePage === "Console") {
-      return (
-        <div className="modulePage">
-          <div className="consoleBox">
-            <div className="consoleLine">
-              <span>[SYSTEM]</span> SantionV server started.
-            </div>
-
-            <div className="consoleLine">
-              <span>[PLAYER]</span> FlameDrift joined the server.
-            </div>
-
-            <div className="consoleLine">
-              <span>[ADMIN]</span> FarukErtas authenticated.
-            </div>
-
-            <div className="consoleInput">
-              <span>&gt;</span>
-              <input placeholder="Enter server command..." />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (activePage === "Lookup") {
-      return (
-        <div className="modulePage">
-          <div className="largePanel">
-            <h2>Player Lookup</h2>
-            <p>Search a Roblox username or UserId.</p>
-
-            <div className="lookupBox">
-              <input placeholder="Username or UserId..." />
-              <button className="greenButton">Search</button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (activePage === "Vehicles") {
-      return (
-        <div className="modulePage">
-          <div className="largePanel">
-            <h2>Vehicles</h2>
-
-            <div className="vehicleGrid">
-              <div className="vehicleCard">
-                <strong>Police Cruiser</strong>
-                <span>Police</span>
-                <button>Spawn</button>
-              </div>
-
-              <div className="vehicleCard">
-                <strong>Ambulance</strong>
-                <span>EMS</span>
-                <button>Spawn</button>
-              </div>
-
-              <div className="vehicleCard">
-                <strong>Sedan</strong>
-                <span>Civilian</span>
-                <button>Spawn</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (activePage === "Bans") {
-      return (
-        <div className="modulePage">
-          <div className="largePanel">
-            <div className="panelHeading">
-              <div>
-                <h2>Bans</h2>
-                <p>Roblox moderation ban records.</p>
-              </div>
-
-              <button className="redButton">New Ban</button>
-            </div>
-
-            <div className="table">
-              <div className="tableHead">
-                <span>PLAYER</span>
-                <span>USER ID</span>
-                <span>REASON</span>
-                <span>ADMIN</span>
-                <span>ACTION</span>
-              </div>
-
-              <div className="tableRow">
-                <span>ExamplePlayer</span>
-                <span>123456789</span>
-                <span>Exploiting</span>
-                <span>FarukErtas</span>
-                <span>
-                  <button className="smallButton">UNBAN</button>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (activePage === "Admins") {
-      return (
-        <div className="modulePage">
-          <div className="largePanel">
-            <div className="panelHeading">
-              <div>
-                <h2>Admins</h2>
-                <p>Roblox administration permissions.</p>
-              </div>
-
-              <button className="greenButton">Add Admin</button>
-            </div>
-
-            <div className="adminCard">
-              <div className="adminAvatar">F</div>
-
-              <div>
-                <strong>FarukErtas</strong>
-                <span>Owner</span>
-              </div>
-
-              <div className="adminStatus">ONLINE</div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return null;
   }
 
   return (
@@ -479,11 +616,22 @@ export default function Home() {
         </div>
 
         <div className="serverSelector">
-          <span className="serverDot" />
+          <span
+            className={
+              serverOnline
+                ? "serverDot"
+                : "serverDot serverDotOffline"
+            }
+          />
 
           <div>
             <small>SERVER</small>
-            <strong>SantionV Roleplay</strong>
+
+            <strong>
+              {serverOnline
+                ? "SantionV Roleplay"
+                : "Server Offline"}
+            </strong>
           </div>
 
           <span>⌄</span>
@@ -493,7 +641,11 @@ export default function Home() {
           <p className="menuTitle">GENERAL</p>
 
           <button
-            className={activePage === "Dashboard" ? "navItem active" : "navItem"}
+            className={
+              activePage === "Dashboard"
+                ? "navItem active"
+                : "navItem"
+            }
             onClick={() => setActivePage("Dashboard")}
           >
             <span>▣</span>
@@ -505,7 +657,11 @@ export default function Home() {
           {menu.slice(1).map((item) => (
             <button
               key={item}
-              className={activePage === item ? "navItem active" : "navItem"}
+              className={
+                activePage === item
+                  ? "navItem active"
+                  : "navItem"
+              }
               onClick={() => setActivePage(item)}
             >
               <span>▣</span>
@@ -515,11 +671,11 @@ export default function Home() {
         </nav>
 
         <div className="account">
-          <div className="avatar">F</div>
+          <div className="avatar">S</div>
 
           <div>
-            <strong>FarukErtas</strong>
-            <span>Owner</span>
+            <strong>SantionV</strong>
+            <span>Web Panel</span>
           </div>
         </div>
       </aside>
@@ -527,25 +683,46 @@ export default function Home() {
       <section className="content">
         <header className="topbar">
           <div>
-            <span className="statusDot" />
-            <span>SERVER ONLINE</span>
+            <span
+              className={
+                serverOnline
+                  ? "statusDot"
+                  : "statusDot statusDotOffline"
+              }
+            />
+
+            <span>
+              {serverOnline
+                ? "SERVER ONLINE"
+                : "SERVER OFFLINE"}
+            </span>
           </div>
 
           <div className="topRight">
-            <span>4 Players</span>
-            <button>⚙</button>
+            <span>
+              {players.length} Player
+              {players.length === 1 ? "" : "s"}
+            </span>
+
+            <button onClick={loadPlayers}>↻</button>
           </div>
         </header>
 
         <div className="pageHeader">
           <div>
-            <p>SANTIONV / SERVER</p>
+            <p>SANTIONV / ROBLOX</p>
             <h1>{activePage}</h1>
           </div>
 
-          <div className="onlineBadge">
+          <div
+            className={
+              serverOnline
+                ? "onlineBadge"
+                : "onlineBadge offlineBadge"
+            }
+          >
             <span />
-            LIVE
+            {serverOnline ? "LIVE" : "OFFLINE"}
           </div>
         </div>
 
