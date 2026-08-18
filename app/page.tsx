@@ -2,12 +2,30 @@
 
 import { useEffect, useState } from "react";
 
+type PlayerPosition = {
+  x: number;
+  y: number;
+  z: number;
+};
+
 type RobloxPlayer = {
   userId: number;
   username: string;
   displayName: string;
-  accountAge?: number;
-  avatarUrl?: string;
+  accountAge: number;
+
+  health: number;
+  maxHealth: number;
+
+  position: PlayerPosition;
+
+  team: string;
+  department: string;
+
+  inVehicle: boolean;
+  vehicleName: string | null;
+
+  humanoidState: string;
 };
 
 type ServerInfo = {
@@ -24,14 +42,6 @@ type PlayersApiResponse = {
   online: boolean;
   server: ServerInfo | null;
   players: RobloxPlayer[];
-};
-
-type ThumbnailApiResponse = {
-  data?: Array<{
-    targetId: number;
-    state: string;
-    imageUrl?: string;
-  }>;
 };
 
 const menu = [
@@ -60,37 +70,6 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  async function getAvatar(userId: number) {
-    try {
-      const response = await fetch(
-        `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`
-      );
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data: ThumbnailApiResponse = await response.json();
-
-      return data.data?.[0]?.imageUrl ?? null;
-    } catch {
-      return null;
-    }
-  }
-
-  async function addAvatars(rawPlayers: RobloxPlayer[]) {
-    return Promise.all(
-      rawPlayers.map(async (player) => {
-        const avatarUrl = await getAvatar(player.userId);
-
-        return {
-          ...player,
-          avatarUrl: avatarUrl ?? undefined,
-        };
-      })
-    );
-  }
-
   async function loadPlayers() {
     try {
       const response = await fetch("/api/roblox/players", {
@@ -103,25 +82,23 @@ export default function Home() {
 
       const data: PlayersApiResponse = await response.json();
 
-      const rawPlayers = Array.isArray(data.players)
+      const loadedPlayers = Array.isArray(data.players)
         ? data.players
         : [];
 
-      const playersWithAvatars = await addAvatars(rawPlayers);
-
-      setPlayers(playersWithAvatars);
+      setPlayers(loadedPlayers);
       setServer(data.server ?? null);
       setServerOnline(Boolean(data.online));
       setLoading(false);
 
-      setSelectedPlayer((currentPlayer) => {
-        if (!currentPlayer) {
+      setSelectedPlayer((current) => {
+        if (!current) {
           return null;
         }
 
         return (
-          playersWithAvatars.find(
-            (player) => player.userId === currentPlayer.userId
+          loadedPlayers.find(
+            (player) => player.userId === current.userId
           ) ?? null
         );
       });
@@ -144,7 +121,7 @@ export default function Home() {
 
     const interval = window.setInterval(() => {
       loadPlayers();
-    }, 5000);
+    }, 3000);
 
     return () => {
       window.clearInterval(interval);
@@ -160,27 +137,6 @@ export default function Home() {
       String(player.userId).includes(query)
     );
   });
-
-  function renderAvatar(
-    player: RobloxPlayer,
-    className: string
-  ) {
-    if (player.avatarUrl) {
-      return (
-        <img
-          src={player.avatarUrl}
-          alt={player.username}
-          className={className}
-        />
-      );
-    }
-
-    return (
-      <div className={className}>
-        {player.username.charAt(0).toUpperCase()}
-      </div>
-    );
-  }
 
   function renderDashboard() {
     return (
@@ -232,17 +188,17 @@ export default function Home() {
 
               <div className="serverDetails">
                 <div>
-                  <span>Server ID</span>
+                  <span>SERVER ID</span>
                   <strong>{server.serverId}</strong>
                 </div>
 
                 <div>
-                  <span>Game ID</span>
+                  <span>GAME ID</span>
                   <strong>{server.gameId}</strong>
                 </div>
 
                 <div>
-                  <span>Players</span>
+                  <span>PLAYERS</span>
                   <strong>
                     {server.playerCount} / {server.maxPlayers}
                   </strong>
@@ -264,6 +220,7 @@ export default function Home() {
           <div className="panelHeading">
             <div>
               <h2>Players</h2>
+
               <p>
                 Real players currently connected to the Roblox server.
               </p>
@@ -295,9 +252,9 @@ export default function Home() {
             <div className="table">
               <div className="tableHead">
                 <span>PLAYER</span>
-                <span>USER ID</span>
-                <span>DISPLAY NAME</span>
-                <span>ACCOUNT AGE</span>
+                <span>HEALTH</span>
+                <span>TEAM</span>
+                <span>STATE</span>
                 <span>ACTION</span>
               </div>
 
@@ -307,20 +264,22 @@ export default function Home() {
                   key={player.userId}
                 >
                   <span className="tablePlayer">
-                    {renderAvatar(
-                      player,
-                      "tablePlayerAvatar"
-                    )}
+                    <div className="tablePlayerAvatar">
+                      {player.username
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
 
                     {player.username}
                   </span>
 
-                  <span>{player.userId}</span>
-                  <span>{player.displayName}</span>
-
                   <span>
-                    {player.accountAge ?? 0} days
+                    {player.health} / {player.maxHealth}
                   </span>
+
+                  <span>{player.team}</span>
+
+                  <span>{player.humanoidState}</span>
 
                   <span>
                     <button
@@ -410,14 +369,18 @@ export default function Home() {
                 </div>
 
                 <h2>Server Offline</h2>
-                <p>Waiting for Roblox heartbeat.</p>
+
+                <p>
+                  Waiting for Roblox heartbeat.
+                </p>
               </div>
             ) : selectedPlayer ? (
-              <div className="selectedCard">
-                {renderAvatar(
-                  selectedPlayer,
-                  "selectedAvatar selectedAvatarImage"
-                )}
+              <div className="selectedCard livePlayerCard">
+                <div className="selectedAvatar">
+                  {selectedPlayer.username
+                    .charAt(0)
+                    .toUpperCase()}
+                </div>
 
                 <p>NOW WATCHING</p>
 
@@ -427,7 +390,39 @@ export default function Home() {
                   {selectedPlayer.displayName}
                 </span>
 
-                <div className="selectedStats">
+                <div className="healthBlock">
+                  <div className="healthHeader">
+                    <span>HEALTH</span>
+
+                    <strong>
+                      {selectedPlayer.health} /{" "}
+                      {selectedPlayer.maxHealth}
+                    </strong>
+                  </div>
+
+                  <div className="healthBar">
+                    <div
+                      className="healthFill"
+                      style={{
+                        width: `${
+                          selectedPlayer.maxHealth > 0
+                            ? Math.max(
+                                0,
+                                Math.min(
+                                  100,
+                                  (selectedPlayer.health /
+                                    selectedPlayer.maxHealth) *
+                                    100
+                                )
+                              )
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="liveStatsGrid">
                   <div>
                     <span>USER ID</span>
                     <strong>
@@ -438,15 +433,68 @@ export default function Home() {
                   <div>
                     <span>ACCOUNT AGE</span>
                     <strong>
-                      {selectedPlayer.accountAge ?? 0}
+                      {selectedPlayer.accountAge} days
                     </strong>
                   </div>
 
                   <div>
-                    <span>STATUS</span>
+                    <span>STATE</span>
                     <strong className="greenText">
-                      ONLINE
+                      {selectedPlayer.humanoidState}
                     </strong>
+                  </div>
+
+                  <div>
+                    <span>TEAM</span>
+                    <strong>
+                      {selectedPlayer.team || "None"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>DEPARTMENT</span>
+                    <strong>
+                      {selectedPlayer.department || "None"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>VEHICLE</span>
+                    <strong>
+                      {selectedPlayer.inVehicle
+                        ? selectedPlayer.vehicleName ??
+                          "Vehicle"
+                        : "On Foot"}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="positionPanel">
+                  <div className="positionTitle">
+                    LIVE POSITION
+                  </div>
+
+                  <div className="positionGrid">
+                    <div>
+                      <span>X</span>
+                      <strong>
+                        {selectedPlayer.position?.x ?? 0}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Y</span>
+                      <strong>
+                        {selectedPlayer.position?.y ?? 0}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Z</span>
+                      <strong>
+                        {selectedPlayer.position?.z ?? 0}
+                      </strong>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -514,10 +562,11 @@ export default function Home() {
                     setSelectedPlayer(player)
                   }
                 >
-                  {renderAvatar(
-                    player,
-                    "playerAvatar playerAvatarImage"
-                  )}
+                  <div className="playerAvatar">
+                    {player.username
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
 
                   <div className="playerInfo">
                     <div className="playerName">
@@ -525,11 +574,11 @@ export default function Home() {
                     </div>
 
                     <div className="realPlayerId">
-                      ID: {player.userId}
+                      HP: {player.health}/{player.maxHealth}
                     </div>
 
                     <div className="flags">
-                      ● ONLINE
+                      ● {player.humanoidState}
                     </div>
                   </div>
 
@@ -646,7 +695,9 @@ export default function Home() {
                 ? "navItem active"
                 : "navItem"
             }
-            onClick={() => setActivePage("Dashboard")}
+            onClick={() =>
+              setActivePage("Dashboard")
+            }
           >
             <span>▣</span>
             Dashboard
@@ -704,7 +755,9 @@ export default function Home() {
               {players.length === 1 ? "" : "s"}
             </span>
 
-            <button onClick={loadPlayers}>↻</button>
+            <button onClick={loadPlayers}>
+              ↻
+            </button>
           </div>
         </header>
 
@@ -722,6 +775,7 @@ export default function Home() {
             }
           >
             <span />
+
             {serverOnline ? "LIVE" : "OFFLINE"}
           </div>
         </div>

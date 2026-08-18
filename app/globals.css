@@ -1,6 +1,6 @@
 /* =========================================================
    SANTIONV ROBLOX ADMIN PANEL
-   globals.css
+   FULL GLOBAL STYLES
    ========================================================= */
 
 * {
@@ -45,7 +45,7 @@ button:disabled {
 }
 
 /* =========================================================
-   MAIN LAYOUT
+   ROOT LAYOUT
    ========================================================= */
 
 .panel {
@@ -398,418 +398,6 @@ nav {
 }
 
 /* =========================================================
-   LIVE MONITOR
-   ========================================================= */
-
-.monitor {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-}
-
-.monitorMain {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.monitorToolbar {
-  min-height: 54px;
-  padding: 10px 15px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  border-bottom: 1px solid #1b252d;
-  background: #06090c;
-}
-
-.monitorToolbar select {
-  width: 180px;
-  height: 32px;
-  padding: 0 11px;
-  outline: none;
-  border: 1px solid #26323b;
-  border-radius: 5px;
-  background: #090e12;
-  color: #dfe6ea;
-  font-size: 8px;
-}
-
-.monitorToolbar button {
-  height: 32px;
-  padding: 0 13px;
-  border: 1px solid #26323b;
-  border-radius: 5px;
-  background: #0a0f13;
-  color: #8997a1;
-  font-size: 7px;
-  transition: 0.15s ease;
-}
-
-.monitorToolbar button:hover {
-  border-color: #41505b;
-  color: #fff;
-}
-
-.monitorToolbar .greenButton {
-  border-color: #08763e;
-  background: #07301d;
-  color: #00e676;
-}
-
-.monitorToolbar .greenButton:hover {
-  background: #0a4027;
-}
-
-.monitorToolbar .yellowButton {
-  border-color: #6d5410;
-  background: #2a2105;
-  color: #ffd740;
-}
-
-.monitorToolbar .redButton {
-  border-color: #712525;
-  background: #2c0c0c;
-  color: #ff6262;
-}
-
-.ready {
-  margin-left: auto;
-  color: #53616b;
-  font-size: 7px;
-}
-
-.ready b {
-  color: #00e676;
-}
-
-/* =========================================================
-   WATCH AREA
-   ========================================================= */
-
-.watchArea {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: auto;
-  background-color: #05080a;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-/* =========================================================
-   SELECTED PLAYER
-   ========================================================= */
-
-.selectedCard {
-  width: 430px;
-  max-width: calc(100% - 40px);
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: 1px solid #16442e;
-  border-radius: 10px;
-  background: rgba(8, 14, 18, 0.96);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
-}
-
-.selectedAvatar {
-  width: 78px;
-  height: 78px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid #197345;
-  border-radius: 50%;
-  background: #0d3c26;
-  color: #55f29e;
-  font-size: 27px;
-  font-weight: 800;
-}
-
-.selectedAvatarImage {
-  padding: 0;
-  object-fit: cover;
-  object-position: center;
-}
-
-.selectedCard > p {
-  margin-top: 16px;
-  color: #00e676;
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-
-.selectedCard h2 {
-  margin-top: 6px;
-  color: #f6f8f9;
-  font-size: 21px;
-}
-
-.displayNameText {
-  margin-top: 3px;
-  color: #697782;
-  font-size: 9px;
-}
-
-.selectedStats {
-  width: 100%;
-  margin-top: 25px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 9px;
-}
-
-.selectedStats > div {
-  min-height: 52px;
-  padding: 10px 7px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #26323a;
-  border-radius: 6px;
-  background: #090e12;
-}
-
-.selectedStats span {
-  margin-bottom: 5px;
-  color: #596873;
-  font-size: 6px;
-  letter-spacing: 1.5px;
-}
-
-.selectedStats strong {
-  color: #eef3f5;
-  font-size: 10px;
-}
-
-.greenText {
-  color: #00e676 !important;
-}
-
-.redText {
-  color: #ff5757 !important;
-}
-
-/* =========================================================
-   EMPTY / RADAR STATE
-   ========================================================= */
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #66747e;
-}
-
-.emptyState h2 {
-  margin-top: 15px;
-  color: #dce3e7;
-  font-size: 18px;
-}
-
-.emptyState p {
-  margin-top: 6px;
-  font-size: 9px;
-}
-
-.radar {
-  width: 70px;
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #16442e;
-  border-radius: 50%;
-  background: #07150f;
-}
-
-.radarDot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #00e676;
-  box-shadow:
-    0 0 10px #00e676,
-    0 0 25px rgba(0, 230, 118, 0.5);
-}
-
-.offlineDot {
-  background: #ff4d4d;
-  box-shadow:
-    0 0 10px #ff4d4d,
-    0 0 25px rgba(255, 77, 77, 0.4);
-}
-
-/* =========================================================
-   RIGHT PLAYER PANEL
-   ========================================================= */
-
-.playerPanel {
-  width: 310px;
-  min-width: 310px;
-  border-left: 1px solid #1b252d;
-  background: #070a0d;
-  overflow-y: auto;
-}
-
-.playerSearch {
-  padding: 13px;
-  border-bottom: 1px solid #1b252d;
-}
-
-.playerSearch input,
-.normalInput {
-  width: 100%;
-  height: 32px;
-  padding: 0 12px;
-  outline: none;
-  border: 1px solid #26323b;
-  border-radius: 5px;
-  background: #090e12;
-  color: #dfe6ea;
-  font-size: 8px;
-}
-
-.playerSearch input:focus,
-.normalInput:focus {
-  border-color: #0c7943;
-}
-
-.playerSearch input::placeholder,
-.normalInput::placeholder {
-  color: #52606a;
-}
-
-.serverConnection {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #77858e;
-  font-size: 7px;
-}
-
-.playerList {
-  width: 100%;
-}
-
-.playerPanelMessage {
-  padding: 25px 15px;
-  color: #64727c;
-  font-size: 8px;
-  text-align: center;
-}
-
-/* =========================================================
-   PLAYER CARD
-   ========================================================= */
-
-.playerCard {
-  min-height: 67px;
-  padding: 11px 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-left: 2px solid transparent;
-  border-bottom: 1px solid #141d23;
-  background: #070a0d;
-  cursor: pointer;
-  transition: 0.15s ease;
-}
-
-.playerCard:hover {
-  background: #0a1110;
-}
-
-.selectedPlayerRow {
-  border-left-color: #00e676;
-  background: #0a1c13;
-}
-
-.playerAvatar {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid #293640;
-  border-radius: 6px;
-  background: #10161b;
-  color: #dfe6ea;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.playerAvatarImage {
-  object-fit: cover;
-  object-position: center;
-}
-
-.playerInfo {
-  flex: 1;
-  min-width: 0;
-}
-
-.playerName {
-  overflow: hidden;
-  color: #f0f4f6;
-  font-size: 9px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.realPlayerId {
-  margin-top: 2px;
-  color: #586772;
-  font-size: 6px;
-}
-
-.flags {
-  margin-top: 3px;
-  color: #00e676;
-  font-size: 6px;
-  font-weight: 700;
-}
-
-.watchButton,
-.smallButton {
-  border: 1px solid #086c3a;
-  border-radius: 4px;
-  background: #062417;
-  color: #00e676;
-  font-size: 6px;
-  font-weight: 700;
-}
-
-.watchButton {
-  height: 24px;
-  padding: 0 10px;
-}
-
-.smallButton {
-  height: 26px;
-  padding: 0 11px;
-}
-
-.watchButton:hover,
-.smallButton:hover {
-  background: #0a3a24;
-}
-
-/* =========================================================
    MODULE PAGES
    ========================================================= */
 
@@ -860,6 +448,14 @@ nav {
   font-size: 7px;
 }
 
+.greenText {
+  color: #00e676 !important;
+}
+
+.redText {
+  color: #ff5757 !important;
+}
+
 /* =========================================================
    LARGE PANEL
    ========================================================= */
@@ -902,8 +498,24 @@ nav {
   font-size: 8px;
 }
 
-.panelHeading .normalInput {
+.normalInput {
   width: 220px;
+  height: 32px;
+  padding: 0 12px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
+}
+
+.normalInput:focus {
+  border-color: #0c7943;
+}
+
+.normalInput::placeholder {
+  color: #52606a;
 }
 
 /* =========================================================
@@ -1005,12 +617,16 @@ nav {
   width: 30px;
   height: 30px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   border: 1px solid #293640;
   border-radius: 6px;
   background: #10161b;
-  object-fit: cover;
-  object-position: center;
+  color: #dce4e8;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .panelMessage {
@@ -1018,6 +634,510 @@ nav {
   color: #65737d;
   font-size: 9px;
   text-align: center;
+}
+
+.smallButton {
+  height: 26px;
+  padding: 0 11px;
+  border: 1px solid #086c3a;
+  border-radius: 4px;
+  background: #062417;
+  color: #00e676;
+  font-size: 6px;
+  font-weight: 700;
+}
+
+.smallButton:hover {
+  background: #0a3a24;
+}
+
+/* =========================================================
+   LIVE MONITOR ROOT
+   ========================================================= */
+
+.monitor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.monitorMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================================
+   MONITOR TOOLBAR
+   ========================================================= */
+
+.monitorToolbar {
+  min-height: 54px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-bottom: 1px solid #1b252d;
+  background: #06090c;
+}
+
+.monitorToolbar select {
+  width: 180px;
+  height: 32px;
+  padding: 0 11px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
+}
+
+.monitorToolbar button {
+  height: 32px;
+  padding: 0 13px;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #0a0f13;
+  color: #8997a1;
+  font-size: 7px;
+  transition: 0.15s ease;
+}
+
+.monitorToolbar button:hover {
+  border-color: #41505b;
+  color: #fff;
+}
+
+.monitorToolbar .greenButton {
+  border-color: #08763e;
+  background: #07301d;
+  color: #00e676;
+}
+
+.monitorToolbar .greenButton:hover {
+  background: #0a4027;
+}
+
+.monitorToolbar .yellowButton {
+  border-color: #6d5410;
+  background: #2a2105;
+  color: #ffd740;
+}
+
+.monitorToolbar .redButton {
+  border-color: #712525;
+  background: #2c0c0c;
+  color: #ff6262;
+}
+
+.ready {
+  margin-left: auto;
+  color: #53616b;
+  font-size: 7px;
+}
+
+.ready b {
+  color: #00e676;
+}
+
+/* =========================================================
+   WATCH AREA
+   ========================================================= */
+
+.watchArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background-color: #05080a;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* =========================================================
+   SELECTED PLAYER CARD
+   ========================================================= */
+
+.selectedCard {
+  width: 430px;
+  max-width: calc(100% - 40px);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #16442e;
+  border-radius: 10px;
+  background: rgba(8, 14, 18, 0.96);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+}
+
+.livePlayerCard {
+  width: 520px;
+}
+
+.selectedAvatar {
+  width: 78px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #197345;
+  border-radius: 50%;
+  background: #0d3c26;
+  color: #55f29e;
+  font-size: 27px;
+  font-weight: 800;
+}
+
+.selectedCard > p {
+  margin-top: 16px;
+  color: #00e676;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.selectedCard h2 {
+  margin-top: 6px;
+  color: #f6f8f9;
+  font-size: 21px;
+}
+
+.displayNameText {
+  margin-top: 3px;
+  color: #697782;
+  font-size: 9px;
+}
+
+/* =========================================================
+   HEALTH
+   ========================================================= */
+
+.healthBlock {
+  width: 100%;
+  margin-top: 22px;
+}
+
+.healthHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+
+.healthHeader span {
+  color: #5f6f79;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+}
+
+.healthHeader strong {
+  color: #eaf1f4;
+  font-size: 9px;
+}
+
+.healthBar {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid #1d4932;
+  border-radius: 999px;
+  background: #06110c;
+}
+
+.healthFill {
+  height: 100%;
+  border-radius: 999px;
+  background: #00e676;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.45);
+  transition: width 0.3s ease;
+}
+
+/* =========================================================
+   LIVE STATS GRID
+   ========================================================= */
+
+.liveStatsGrid {
+  width: 100%;
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.liveStatsGrid > div {
+  min-height: 54px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #26323a;
+  border-radius: 6px;
+  background: #090e12;
+}
+
+.liveStatsGrid span {
+  color: #596873;
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.liveStatsGrid strong {
+  max-width: 100%;
+  margin-top: 6px;
+  overflow: hidden;
+  color: #e8eef1;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   LIVE POSITION
+   ========================================================= */
+
+.positionPanel {
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px solid #202c33;
+  border-radius: 6px;
+  background: #070c0f;
+}
+
+.positionTitle {
+  margin-bottom: 10px;
+  color: #00e676;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.positionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.positionGrid > div {
+  padding: 9px;
+  border: 1px solid #1b252c;
+  border-radius: 5px;
+  background: #0a1014;
+}
+
+.positionGrid span {
+  display: block;
+  color: #5d6b75;
+  font-size: 6px;
+}
+
+.positionGrid strong {
+  display: block;
+  margin-top: 5px;
+  color: #f0f4f6;
+  font-size: 10px;
+}
+
+/* =========================================================
+   EMPTY / RADAR STATE
+   ========================================================= */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #66747e;
+}
+
+.emptyState h2 {
+  margin-top: 15px;
+  color: #dce3e7;
+  font-size: 18px;
+}
+
+.emptyState p {
+  margin-top: 6px;
+  font-size: 9px;
+}
+
+.radar {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #16442e;
+  border-radius: 50%;
+  background: #07150f;
+}
+
+.radarDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #00e676;
+  box-shadow:
+    0 0 10px #00e676,
+    0 0 25px rgba(0, 230, 118, 0.5);
+}
+
+.offlineDot {
+  background: #ff4d4d;
+  box-shadow:
+    0 0 10px #ff4d4d,
+    0 0 25px rgba(255, 77, 77, 0.4);
+}
+
+/* =========================================================
+   RIGHT PLAYER PANEL
+   ========================================================= */
+
+.playerPanel {
+  width: 310px;
+  min-width: 310px;
+  border-left: 1px solid #1b252d;
+  background: #070a0d;
+  overflow-y: auto;
+}
+
+.playerSearch {
+  padding: 13px;
+  border-bottom: 1px solid #1b252d;
+}
+
+.playerSearch input {
+  width: 100%;
+  height: 32px;
+  padding: 0 12px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
+}
+
+.playerSearch input:focus {
+  border-color: #0c7943;
+}
+
+.playerSearch input::placeholder {
+  color: #52606a;
+}
+
+.serverConnection {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #77858e;
+  font-size: 7px;
+}
+
+.playerList {
+  width: 100%;
+}
+
+.playerPanelMessage {
+  padding: 25px 15px;
+  color: #64727c;
+  font-size: 8px;
+  text-align: center;
+}
+
+/* =========================================================
+   PLAYER CARD
+   ========================================================= */
+
+.playerCard {
+  min-height: 67px;
+  padding: 11px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 2px solid transparent;
+  border-bottom: 1px solid #141d23;
+  background: #070a0d;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.playerCard:hover {
+  background: #0a1110;
+}
+
+.selectedPlayerRow {
+  border-left-color: #00e676;
+  background: #0a1c13;
+}
+
+.playerAvatar {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #293640;
+  border-radius: 6px;
+  background: #10161b;
+  color: #dfe6ea;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.playerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.playerName {
+  overflow: hidden;
+  color: #f0f4f6;
+  font-size: 9px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.realPlayerId {
+  margin-top: 2px;
+  color: #586772;
+  font-size: 6px;
+}
+
+.flags {
+  margin-top: 3px;
+  color: #00e676;
+  font-size: 6px;
+  font-weight: 700;
+}
+
+.watchButton {
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid #086c3a;
+  border-radius: 4px;
+  background: #062417;
+  color: #00e676;
+  font-size: 6px;
+  font-weight: 700;
+}
+
+.watchButton:hover {
+  background: #0a3a24;
 }
 
 /* =========================================================
@@ -1054,6 +1174,10 @@ nav {
 
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .livePlayerCard {
+    width: 460px;
   }
 }
 
@@ -1093,7 +1217,9 @@ nav {
   }
 
   .selectedStats,
-  .serverDetails {
+  .serverDetails,
+  .liveStatsGrid,
+  .positionGrid {
     grid-template-columns: 1fr;
   }
 
@@ -1104,5 +1230,9 @@ nav {
   .tableHead,
   .tableRow {
     min-width: 750px;
+  }
+
+  .livePlayerCard {
+    width: calc(100% - 30px);
   }
 }
