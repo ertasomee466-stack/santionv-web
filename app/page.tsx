@@ -44,6 +44,15 @@ type PlayersApiResponse = {
   players: RobloxPlayer[];
 };
 
+type AdminCommand =
+  | "heal"
+  | "respawn"
+  | "freeze"
+  | "unfreeze"
+  | "kick"
+  | "bring"
+  | "goto";
+
 type ConsoleItem = {
   id: number;
   time: string;
@@ -103,8 +112,15 @@ export default function Home() {
   const [selectedPlayer, setSelectedPlayer] =
     useState<RobloxPlayer | null>(null);
 
+  const [targetPlayerId, setTargetPlayerId] = useState<number | null>(
+    null
+  );
+
   const [search, setSearch] = useState("");
   const [lookupQuery, setLookupQuery] = useState("");
+
+  const [commandLoading, setCommandLoading] = useState(false);
+  const [kickReason, setKickReason] = useState("");
 
   const [consoleItems, setConsoleItems] = useState<ConsoleItem[]>([]);
   const [lastPlayerCount, setLastPlayerCount] = useState<number | null>(
@@ -179,10 +195,7 @@ export default function Home() {
 
       setLastPlayerCount(loadedPlayers.length);
     } catch (error) {
-      console.error(
-        "[SantionV Panel] Player API error:",
-        error
-      );
+      console.error("[SantionV Panel] Player API error:", error);
 
       setPlayers([]);
       setServer(null);
@@ -194,6 +207,80 @@ export default function Home() {
         "error",
         "Roblox player API could not be loaded."
       );
+    }
+  }
+
+  async function sendAdminCommand(
+    command: AdminCommand
+  ) {
+    if (!selectedPlayer) {
+      addConsole("warning", "No player selected.");
+      return;
+    }
+
+    if (
+      (command === "bring" || command === "goto") &&
+      !targetPlayerId
+    ) {
+      addConsole(
+        "warning",
+        `${command.toUpperCase()} requires a target player.`
+      );
+      return;
+    }
+
+    setCommandLoading(true);
+
+    try {
+      const response = await fetch("/api/roblox/commands", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          command,
+          userId: selectedPlayer.userId,
+          targetUserId:
+            command === "bring" || command === "goto"
+              ? targetPlayerId
+              : undefined,
+          reason:
+            command === "kick"
+              ? kickReason.trim() || "Removed by SantionV Admin"
+              : undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Command failed");
+      }
+
+      addConsole(
+        "success",
+        `${command.toUpperCase()} queued for ${selectedPlayer.username}.`
+      );
+
+      if (command === "kick") {
+        setKickReason("");
+      }
+
+      window.setTimeout(() => {
+        loadPlayers();
+      }, 1500);
+    } catch (error) {
+      console.error(
+        "[SantionV Panel] Command error:",
+        error
+      );
+
+      addConsole(
+        "error",
+        `${command.toUpperCase()} command failed.`
+      );
+    } finally {
+      setCommandLoading(false);
     }
   }
 
@@ -284,12 +371,10 @@ export default function Home() {
 
           <div className="statCard">
             <span>SERVER CAPACITY</span>
-
             <strong>
               {server?.playerCount ?? 0}/
               {server?.maxPlayers ?? 0}
             </strong>
-
             <small>Current server usage</small>
           </div>
 
@@ -417,10 +502,7 @@ export default function Home() {
           <div className="panelHeading">
             <div>
               <h2>Online Players</h2>
-
-              <p>
-                Real-time Roblox player information.
-              </p>
+              <p>Real-time Roblox player information.</p>
             </div>
 
             <input
@@ -465,10 +547,7 @@ export default function Home() {
 
                     <div>
                       <strong>{player.username}</strong>
-
-                      <small>
-                        {player.displayName}
-                      </small>
+                      <small>{player.displayName}</small>
                     </div>
                   </span>
 
@@ -476,9 +555,7 @@ export default function Home() {
                     {player.health}/{player.maxHealth}
                   </span>
 
-                  <span>
-                    {player.team || "None"}
-                  </span>
+                  <span>{player.team || "None"}</span>
 
                   <span>{player.humanoidState}</span>
 
@@ -502,6 +579,11 @@ export default function Home() {
   }
 
   function renderLiveMonitor() {
+    const otherPlayers = players.filter(
+      (player) =>
+        player.userId !== selectedPlayer?.userId
+    );
+
     return (
       <div className="monitor">
         <div className="monitorMain">
@@ -519,9 +601,7 @@ export default function Home() {
                 setSelectedPlayer(found);
               }}
             >
-              <option value="">
-                Select Player...
-              </option>
+              <option value="">Select Player...</option>
 
               {players.map((player) => (
                 <option
@@ -576,6 +656,7 @@ export default function Home() {
               className="redButton"
               onClick={() => {
                 setSelectedPlayer(null);
+                setTargetPlayerId(null);
 
                 addConsole(
                   "warning",
@@ -600,9 +681,7 @@ export default function Home() {
 
                 <h2>Server Offline</h2>
 
-                <p>
-                  Waiting for Roblox heartbeat.
-                </p>
+                <p>Waiting for Roblox heartbeat.</p>
               </div>
             ) : !selectedPlayer ? (
               <div className="emptyState">
@@ -612,9 +691,7 @@ export default function Home() {
 
                 <h2>Live Monitor</h2>
 
-                <p>
-                  Select a Roblox player to monitor.
-                </p>
+                <p>Select a Roblox player to monitor.</p>
               </div>
             ) : (
               <div className="selectedCard livePlayerCard">
@@ -693,7 +770,6 @@ export default function Home() {
 
                   <div>
                     <span>VEHICLE</span>
-
                     <strong>
                       {selectedPlayer.inVehicle
                         ? selectedPlayer.vehicleName ??
@@ -744,16 +820,117 @@ export default function Home() {
                   </div>
 
                   <div className="commandGrid">
-                    <button disabled>HEAL</button>
-                    <button disabled>RESPAWN</button>
-                    <button disabled>BRING</button>
-                    <button disabled>GOTO</button>
-                    <button disabled>FREEZE</button>
-                    <button disabled>KICK</button>
+                    <button
+                      disabled={commandLoading}
+                      onClick={() =>
+                        sendAdminCommand("heal")
+                      }
+                    >
+                      HEAL
+                    </button>
+
+                    <button
+                      disabled={commandLoading}
+                      onClick={() =>
+                        sendAdminCommand("respawn")
+                      }
+                    >
+                      RESPAWN
+                    </button>
+
+                    <button
+                      disabled={commandLoading}
+                      onClick={() =>
+                        sendAdminCommand("freeze")
+                      }
+                    >
+                      FREEZE
+                    </button>
+
+                    <button
+                      disabled={commandLoading}
+                      onClick={() =>
+                        sendAdminCommand("unfreeze")
+                      }
+                    >
+                      UNFREEZE
+                    </button>
+
+                    <button
+                      disabled={commandLoading}
+                      onClick={() =>
+                        sendAdminCommand("kick")
+                      }
+                    >
+                      KICK
+                    </button>
                   </div>
 
+                  <div className="commandTargetArea">
+                    <select
+                      value={targetPlayerId ?? ""}
+                      onChange={(event) => {
+                        const value = Number(
+                          event.target.value
+                        );
+
+                        setTargetPlayerId(
+                          value > 0 ? value : null
+                        );
+                      }}
+                    >
+                      <option value="">
+                        Select target for BRING/GOTO
+                      </option>
+
+                      {otherPlayers.map((player) => (
+                        <option
+                          key={player.userId}
+                          value={player.userId}
+                        >
+                          {player.username}
+                        </option>
+                      ))}
+                    </select>
+
+                    <div className="commandGrid two">
+                      <button
+                        disabled={
+                          commandLoading ||
+                          !targetPlayerId
+                        }
+                        onClick={() =>
+                          sendAdminCommand("bring")
+                        }
+                      >
+                        BRING
+                      </button>
+
+                      <button
+                        disabled={
+                          commandLoading ||
+                          !targetPlayerId
+                        }
+                        onClick={() =>
+                          sendAdminCommand("goto")
+                        }
+                      >
+                        GOTO
+                      </button>
+                    </div>
+                  </div>
+
+                  <input
+                    className="kickReasonInput"
+                    placeholder="Kick reason..."
+                    value={kickReason}
+                    onChange={(event) =>
+                      setKickReason(event.target.value)
+                    }
+                  />
+
                   <small>
-                    Command backend will be connected next.
+                    Commands are sent to the live Roblox server.
                   </small>
                 </div>
               </div>
@@ -824,7 +1001,6 @@ export default function Home() {
                   className="watchButton"
                   onClick={(event) => {
                     event.stopPropagation();
-
                     watchPlayer(player);
                   }}
                 >
@@ -845,9 +1021,7 @@ export default function Home() {
           <div className="panelHeading">
             <div>
               <h2>Interactive Map</h2>
-              <p>
-                Live X / Z player positions.
-              </p>
+              <p>Live X / Z player positions.</p>
             </div>
           </div>
 
@@ -879,9 +1053,7 @@ export default function Home() {
               );
             })}
 
-            <div className="mapCenterCross">
-              +
-            </div>
+            <div className="mapCenterCross">+</div>
           </div>
         </div>
       </div>
@@ -936,10 +1108,7 @@ export default function Home() {
           <div className="panelHeading">
             <div>
               <h2>Player Lookup</h2>
-
-              <p>
-                Search currently connected players.
-              </p>
+              <p>Search currently connected players.</p>
             </div>
 
             <input
@@ -974,12 +1143,9 @@ export default function Home() {
                   <span>{player.displayName}</span>
 
                   <p>User ID: {player.userId}</p>
+                  <p>Account: {player.accountAge} days</p>
                   <p>
-                    Account: {player.accountAge} days
-                  </p>
-                  <p>
-                    HP: {player.health}/
-                    {player.maxHealth}
+                    HP: {player.health}/{player.maxHealth}
                   </p>
                   <p>Team: {player.team}</p>
 
@@ -1006,9 +1172,7 @@ export default function Home() {
         <div className="largePanel">
           <h2>Active Vehicles</h2>
 
-          <p>
-            Vehicles currently occupied by players.
-          </p>
+          <p>Vehicles currently occupied by players.</p>
 
           {playersInVehicles.length === 0 ? (
             <div className="panelMessage">
@@ -1068,12 +1232,11 @@ export default function Home() {
           <h2>Bans</h2>
 
           <p>
-            Ban database and Roblox command system will be
-            connected in the next backend stage.
+            Ban database will be connected separately.
           </p>
 
           <div className="panelMessage">
-            No ban backend connected yet.
+            No persistent ban backend connected yet.
           </div>
         </div>
       </div>
@@ -1209,9 +1372,7 @@ export default function Home() {
           {pages.map((page, index) => (
             <div key={page}>
               {index === 1 && (
-                <p className="menuTitle">
-                  SERVER
-                </p>
+                <p className="menuTitle">SERVER</p>
               )}
 
               <button
@@ -1220,9 +1381,7 @@ export default function Home() {
                     ? "navItem active"
                     : "navItem"
                 }
-                onClick={() =>
-                  setActivePage(page)
-                }
+                onClick={() => setActivePage(page)}
               >
                 <span>▣</span>
                 {page}
@@ -1265,9 +1424,7 @@ export default function Home() {
               {players.length === 1 ? "" : "s"}
             </span>
 
-            <button onClick={loadPlayers}>
-              ↻
-            </button>
+            <button onClick={loadPlayers}>↻</button>
           </div>
         </header>
 

@@ -1,8 +1,3 @@
-/* =========================================================
-   SANTIONV ROBLOX ADMIN PANEL
-   FULL GLOBALS.CSS
-   ========================================================= */
-
 * {
   box-sizing: border-box;
   margin: 0;
@@ -18,14 +13,7 @@ body {
 body {
   background: #05080a;
   color: #e8edf2;
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   overflow: hidden;
 }
 
@@ -40,13 +28,9 @@ button {
 }
 
 button:disabled {
-  cursor: not-allowed;
   opacity: 0.45;
+  cursor: not-allowed;
 }
-
-/* =========================================================
-   ROOT
-   ========================================================= */
 
 .panel {
   width: 100vw;
@@ -62,8 +46,8 @@ button:disabled {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #1b252d;
   background: #070a0d;
+  border-right: 1px solid #1b252d;
 }
 
 .content {
@@ -73,19 +57,14 @@ button:disabled {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #05080a;
 }
-
-/* =========================================================
-   LOGO
-   ========================================================= */
 
 .logo {
   height: 52px;
+  padding: 0 17px;
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 0 17px;
   border-bottom: 1px solid #1b252d;
 }
 
@@ -95,7 +74,6 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   border-radius: 9px;
   background: #00e676;
   color: #03150b;
@@ -103,27 +81,23 @@ button:disabled {
   font-weight: 900;
 }
 
-.logo > div:last-child {
+.logo > div:last-child,
+.account > div:last-child {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .logo strong {
-  color: #f5f8fa;
   font-size: 11px;
-  font-weight: 700;
 }
 
-.logo span {
+.logo span,
+.account span {
+  margin-top: 2px;
   color: #65727c;
   font-size: 7px;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
 }
-
-/* =========================================================
-   SERVER SELECTOR
-   ========================================================= */
 
 .serverSelector {
   margin: 15px 12px 13px;
@@ -139,7 +113,6 @@ button:disabled {
 
 .serverSelector > div {
   flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -147,21 +120,11 @@ button:disabled {
 .serverSelector small {
   color: #64717b;
   font-size: 6px;
-  letter-spacing: 1px;
 }
 
 .serverSelector strong {
   margin-top: 2px;
-  overflow: hidden;
-  color: #eef3f6;
   font-size: 9px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.serverSelector > span:last-child {
-  color: #64717b;
-  font-size: 10px;
 }
 
 .serverDot,
@@ -181,10 +144,6 @@ button:disabled {
   background: #ff4d4d;
   box-shadow: 0 0 10px rgba(255, 77, 77, 0.55);
 }
-
-/* =========================================================
-   NAV
-   ========================================================= */
 
 nav {
   flex: 1;
@@ -214,36 +173,22 @@ nav {
   color: #8b99a4;
   font-size: 9px;
   text-align: left;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.navItem span {
-  width: 10px;
-  color: #52758d;
-  font-size: 8px;
 }
 
 .navItem:hover {
   background: #0b1115;
-  color: #e7edf1;
+  color: #fff;
 }
 
 .navItem.active {
   border-color: #124a32;
   background: #0b2519;
-  color: #f2fff8;
+  color: #fff;
 }
 
 .navItem.active span {
   color: #00e676;
 }
-
-/* =========================================================
-   ACCOUNT
-   ========================================================= */
 
 .account {
   min-height: 55px;
@@ -252,43 +197,22 @@ nav {
   align-items: center;
   gap: 10px;
   border-top: 1px solid #1b252d;
-  background: #070a0d;
 }
 
-.account .avatar {
+.avatar {
   width: 30px;
   height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   border: 1px solid #293640;
   border-radius: 50%;
-  background: #0c1217;
   color: #00e676;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.account > div:last-child {
-  display: flex;
-  flex-direction: column;
 }
 
 .account strong {
-  color: #f3f6f8;
   font-size: 9px;
 }
-
-.account span {
-  margin-top: 2px;
-  color: #63717b;
-  font-size: 7px;
-}
-
-/* =========================================================
-   TOPBAR
-   ========================================================= */
 
 .topbar {
   height: 36px;
@@ -298,10 +222,10 @@ nav {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #1b252d;
-  background: #070a0d;
 }
 
-.topbar > div {
+.topbar > div,
+.topRight {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -310,13 +234,6 @@ nav {
 .topbar span {
   color: #71808a;
   font-size: 7px;
-  letter-spacing: 0.5px;
-}
-
-.topRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .topRight button {
@@ -328,15 +245,6 @@ nav {
   color: #8c9aa4;
 }
 
-.topRight button:hover {
-  border-color: #00a956;
-  color: #00e676;
-}
-
-/* =========================================================
-   PAGE HEADER
-   ========================================================= */
-
 .pageHeader {
   min-height: 72px;
   padding: 17px 28px;
@@ -344,31 +252,24 @@ nav {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #1b252d;
-  background: #06090c;
 }
 
 .pageHeader p {
   margin-bottom: 5px;
   color: #53636e;
   font-size: 6px;
-  font-weight: 700;
   letter-spacing: 2px;
 }
 
 .pageHeader h1 {
-  color: #f7f9fa;
   font-size: 21px;
-  line-height: 1;
-  font-weight: 700;
 }
 
 .onlineBadge {
-  min-width: 54px;
   height: 25px;
   padding: 0 10px;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   border: 1px solid #086f3c;
   border-radius: 5px;
@@ -383,7 +284,6 @@ nav {
   height: 6px;
   border-radius: 50%;
   background: #00e676;
-  box-shadow: 0 0 8px rgba(0, 230, 118, 0.8);
 }
 
 .offlineBadge {
@@ -394,12 +294,7 @@ nav {
 
 .offlineBadge span {
   background: #ff4d4d;
-  box-shadow: 0 0 8px rgba(255, 77, 77, 0.7);
 }
-
-/* =========================================================
-   MODULE PAGE
-   ========================================================= */
 
 .modulePage {
   flex: 1;
@@ -408,46 +303,94 @@ nav {
   overflow-y: auto;
 }
 
-.statsGrid {
+.statsGrid,
+.simpleGrid,
+.serverDetails,
+.liveStatsGrid,
+.positionGrid,
+.commandGrid,
+.lookupGrid,
+.vehicleGrid {
   display: grid;
+  gap: 10px;
+}
+
+.statsGrid {
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+}
+
+.simpleGrid {
+  margin-top: 16px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.serverDetails {
+  margin-top: 20px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.liveStatsGrid,
+.positionGrid,
+.commandGrid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.lookupGrid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.vehicleGrid {
+  margin-top: 18px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.statCard,
+.simpleInfoCard,
+.serverDetails > div,
+.liveStatsGrid > div,
+.positionGrid > div,
+.lookupCard,
+.vehicleCard {
+  border: 1px solid #202b33;
+  border-radius: 7px;
+  background: #080d11;
 }
 
 .statCard {
   min-height: 115px;
   padding: 18px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border: 1px solid #202b33;
-  border-radius: 8px;
-  background: #080d11;
 }
 
-.statCard > span {
+.statCard > span,
+.serverDetails span,
+.liveStatsGrid span,
+.positionGrid span {
   color: #63727c;
-  font-size: 7px;
+  font-size: 6px;
   font-weight: 700;
-  letter-spacing: 1.2px;
+  letter-spacing: 1px;
 }
 
 .statCard strong {
+  display: block;
   margin-top: 10px;
-  color: #f2f5f7;
   font-size: 25px;
 }
 
-.statCard .smallStat {
-  font-size: 15px;
-}
-
 .statCard small {
+  display: block;
   margin-top: 7px;
   color: #53616b;
   font-size: 7px;
 }
 
+.simpleInfoCard {
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.simpleInfoCard strong,
 .greenText {
   color: #00e676 !important;
 }
@@ -455,10 +398,6 @@ nav {
 .redText {
   color: #ff5757 !important;
 }
-
-/* =========================================================
-   LARGE PANEL
-   ========================================================= */
 
 .largePanel {
   margin-top: 15px;
@@ -473,35 +412,30 @@ nav {
 }
 
 .largePanel h2 {
-  color: #eef3f5;
   font-size: 15px;
 }
 
-.largePanel > p {
-  margin-top: 7px;
+.largePanel > p,
+.panelHeading p {
+  margin-top: 6px;
   color: #697781;
-  font-size: 9px;
-  line-height: 1.6;
+  font-size: 8px;
 }
 
 .panelHeading {
+  margin-bottom: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 18px;
 }
 
-.panelHeading p {
-  margin-top: 5px;
-  color: #66747e;
-  font-size: 8px;
-}
-
-.normalInput {
-  width: 220px;
+.normalInput,
+.playerSearch input,
+.kickReasonInput,
+.commandTargetArea select {
   height: 32px;
-  padding: 0 12px;
+  padding: 0 11px;
   outline: none;
   border: 1px solid #26323b;
   border-radius: 5px;
@@ -510,82 +444,26 @@ nav {
   font-size: 8px;
 }
 
-.normalInput:focus {
+.normalInput {
+  width: 220px;
+}
+
+.normalInput:focus,
+.playerSearch input:focus,
+.kickReasonInput:focus,
+.commandTargetArea select:focus {
   border-color: #0c7943;
-}
-
-.normalInput::placeholder {
-  color: #52606a;
-}
-
-/* =========================================================
-   SERVER DETAILS
-   ========================================================= */
-
-.serverDetails {
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
 }
 
 .serverDetails > div {
   padding: 14px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #202b33;
-  border-radius: 6px;
-  background: #070b0e;
-}
-
-.serverDetails span {
-  color: #586772;
-  font-size: 6px;
-  letter-spacing: 1px;
 }
 
 .serverDetails strong {
+  display: block;
   margin-top: 6px;
-  overflow: hidden;
-  color: #dfe6ea;
   font-size: 9px;
-  text-overflow: ellipsis;
 }
-
-/* =========================================================
-   SIMPLE GRID
-   ========================================================= */
-
-.simpleGrid {
-  margin-top: 16px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.simpleInfoCard {
-  padding: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #202b33;
-  border-radius: 6px;
-  background: #070b0e;
-}
-
-.simpleInfoCard span {
-  color: #8c98a1;
-  font-size: 8px;
-}
-
-.simpleInfoCard strong {
-  color: #00e676;
-  font-size: 15px;
-}
-
-/* =========================================================
-   PLAYERS TABLE
-   ========================================================= */
 
 .table {
   width: 100%;
@@ -609,39 +487,25 @@ nav {
 .tableHead {
   min-height: 36px;
   padding: 0 14px;
-  border-bottom: 1px solid #202b33;
   background: #0b1115;
 }
 
 .tableHead span {
   color: #5f6e78;
   font-size: 6px;
-  font-weight: 700;
-  letter-spacing: 1px;
 }
 
 .tableRow {
   min-height: 52px;
   padding: 7px 14px;
-  border-bottom: 1px solid #151e24;
-  color: #aab5bc;
+  border-top: 1px solid #151e24;
   font-size: 8px;
-}
-
-.tableRow:last-child {
-  border-bottom: none;
-}
-
-.tableRow:hover {
-  background: #09100d;
 }
 
 .tablePlayer {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #edf2f4;
-  font-weight: 600;
 }
 
 .tablePlayer > div:last-child {
@@ -655,32 +519,30 @@ nav {
   font-size: 6px;
 }
 
-.tablePlayerAvatar {
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
+.tablePlayerAvatar,
+.playerAvatar {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
   border: 1px solid #293640;
   border-radius: 6px;
   background: #10161b;
-  color: #dce4e8;
-  font-size: 11px;
   font-weight: 800;
 }
 
-.panelMessage {
-  padding: 45px 20px;
-  color: #65737d;
-  font-size: 9px;
-  text-align: center;
+.tablePlayerAvatar {
+  width: 30px;
+  height: 30px;
 }
 
-.smallButton {
-  height: 26px;
-  padding: 0 11px;
+.playerAvatar {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.smallButton,
+.watchButton {
   border: 1px solid #086c3a;
   border-radius: 4px;
   background: #062417;
@@ -689,13 +551,15 @@ nav {
   font-weight: 700;
 }
 
-.smallButton:hover {
-  background: #0a3a24;
+.smallButton {
+  height: 26px;
+  padding: 0 11px;
 }
 
-/* =========================================================
-   LIVE MONITOR
-   ========================================================= */
+.watchButton {
+  height: 24px;
+  padding: 0 10px;
+}
 
 .monitor {
   flex: 1;
@@ -717,57 +581,43 @@ nav {
   align-items: center;
   gap: 7px;
   border-bottom: 1px solid #1b252d;
-  background: #06090c;
 }
 
-.monitorToolbar select {
-  width: 180px;
-  height: 32px;
-  padding: 0 11px;
-  outline: none;
-  border: 1px solid #26323b;
-  border-radius: 5px;
-  background: #090e12;
-  color: #dfe6ea;
-  font-size: 8px;
-}
-
+.monitorToolbar select,
 .monitorToolbar button {
   height: 32px;
-  padding: 0 13px;
   border: 1px solid #26323b;
   border-radius: 5px;
   background: #0a0f13;
   color: #8997a1;
   font-size: 7px;
-  transition: 0.15s ease;
 }
 
-.monitorToolbar button:hover {
-  border-color: #41505b;
-  color: #fff;
+.monitorToolbar select {
+  width: 180px;
+  padding: 0 11px;
 }
 
-.monitorToolbar .greenButton {
-  border-color: #08763e;
-  background: #07301d;
-  color: #00e676;
+.monitorToolbar button {
+  padding: 0 13px;
 }
 
-.monitorToolbar .greenButton:hover {
-  background: #0a4027;
+.greenButton {
+  border-color: #08763e !important;
+  background: #07301d !important;
+  color: #00e676 !important;
 }
 
-.monitorToolbar .yellowButton {
-  border-color: #6d5410;
-  background: #2a2105;
-  color: #ffd740;
+.yellowButton {
+  border-color: #6d5410 !important;
+  background: #2a2105 !important;
+  color: #ffd740 !important;
 }
 
-.monitorToolbar .redButton {
-  border-color: #712525;
-  background: #2c0c0c;
-  color: #ff6262;
+.redButton {
+  border-color: #712525 !important;
+  background: #2c0c0c !important;
+  color: #ff6262 !important;
 }
 
 .ready {
@@ -780,12 +630,7 @@ nav {
   color: #00e676;
 }
 
-/* =========================================================
-   WATCH AREA
-   ========================================================= */
-
 .watchArea {
-  position: relative;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -799,10 +644,6 @@ nav {
   background-size: 32px 32px;
 }
 
-/* =========================================================
-   LIVE PLAYER CARD
-   ========================================================= */
-
 .selectedCard {
   width: 430px;
   max-width: calc(100% - 40px);
@@ -813,7 +654,6 @@ nav {
   border: 1px solid #16442e;
   border-radius: 10px;
   background: rgba(8, 14, 18, 0.96);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
 }
 
 .livePlayerCard {
@@ -826,7 +666,6 @@ nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
   border: 1px solid #197345;
   border-radius: 50%;
   background: #0d3c26;
@@ -840,12 +679,10 @@ nav {
   color: #00e676;
   font-size: 7px;
   font-weight: 800;
-  letter-spacing: 2px;
 }
 
 .selectedCard h2 {
   margin-top: 6px;
-  color: #f6f8f9;
   font-size: 21px;
 }
 
@@ -855,32 +692,16 @@ nav {
   font-size: 9px;
 }
 
-/* =========================================================
-   HEALTH
-   ========================================================= */
-
 .healthBlock {
   width: 100%;
   margin-top: 22px;
 }
 
 .healthHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   margin-bottom: 7px;
-}
-
-.healthHeader span {
-  color: #5f6f79;
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 1.3px;
-}
-
-.healthHeader strong {
-  color: #eaf1f4;
-  font-size: 9px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
 }
 
 .healthBar {
@@ -896,56 +717,28 @@ nav {
   height: 100%;
   border-radius: 999px;
   background: #00e676;
-  box-shadow: 0 0 10px rgba(0, 230, 118, 0.45);
   transition: width 0.3s ease;
 }
-
-/* =========================================================
-   LIVE STATS
-   ========================================================= */
 
 .liveStatsGrid {
   width: 100%;
   margin-top: 15px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
 }
 
-.liveStatsGrid > div {
-  min-height: 54px;
+.liveStatsGrid > div,
+.positionGrid > div {
   padding: 10px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #26323a;
-  border-radius: 6px;
-  background: #090e12;
 }
 
-.liveStatsGrid span {
-  color: #596873;
-  font-size: 6px;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.liveStatsGrid strong {
-  max-width: 100%;
-  margin-top: 6px;
-  overflow: hidden;
-  color: #e8eef1;
+.liveStatsGrid strong,
+.positionGrid strong {
+  display: block;
+  margin-top: 5px;
   font-size: 9px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-/* =========================================================
-   POSITION
-   ========================================================= */
-
-.positionPanel {
+.positionPanel,
+.commandPreview {
   width: 100%;
   margin-top: 14px;
   padding: 13px;
@@ -962,48 +755,7 @@ nav {
   letter-spacing: 1.5px;
 }
 
-.positionGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.positionGrid > div {
-  padding: 9px;
-  border: 1px solid #1b252c;
-  border-radius: 5px;
-  background: #0a1014;
-}
-
-.positionGrid span {
-  display: block;
-  color: #5d6b75;
-  font-size: 6px;
-}
-
-.positionGrid strong {
-  display: block;
-  margin-top: 5px;
-  color: #f0f4f6;
-  font-size: 10px;
-}
-
-/* =========================================================
-   ADMIN COMMAND PREVIEW
-   ========================================================= */
-
-.commandPreview {
-  width: 100%;
-  margin-top: 14px;
-  padding: 13px;
-  border: 1px solid #202c33;
-  border-radius: 6px;
-  background: #070c0f;
-}
-
 .commandGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 7px;
 }
 
@@ -1017,6 +769,31 @@ nav {
   font-weight: 700;
 }
 
+.commandGrid button:not(:disabled) {
+  border-color: #086c3a;
+  background: #062417;
+  color: #00e676;
+}
+
+.commandGrid.two {
+  margin-top: 7px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.commandTargetArea {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.commandTargetArea select {
+  width: 100%;
+}
+
+.kickReasonInput {
+  width: 100%;
+  margin-top: 10px;
+}
+
 .commandPreview small {
   display: block;
   margin-top: 9px;
@@ -1024,10 +801,6 @@ nav {
   font-size: 6px;
   text-align: center;
 }
-
-/* =========================================================
-   EMPTY STATE
-   ========================================================= */
 
 .emptyState {
   display: flex;
@@ -1038,8 +811,6 @@ nav {
 
 .emptyState h2 {
   margin-top: 15px;
-  color: #dce3e7;
-  font-size: 18px;
 }
 
 .emptyState p {
@@ -1055,7 +826,6 @@ nav {
   justify-content: center;
   border: 1px solid #16442e;
   border-radius: 50%;
-  background: #07150f;
 }
 
 .radarDot {
@@ -1063,28 +833,17 @@ nav {
   height: 9px;
   border-radius: 50%;
   background: #00e676;
-  box-shadow:
-    0 0 10px #00e676,
-    0 0 25px rgba(0, 230, 118, 0.5);
 }
 
 .offlineDot {
   background: #ff4d4d;
-  box-shadow:
-    0 0 10px #ff4d4d,
-    0 0 25px rgba(255, 77, 77, 0.4);
 }
-
-/* =========================================================
-   RIGHT PLAYER PANEL
-   ========================================================= */
 
 .playerPanel {
   width: 310px;
   min-width: 310px;
-  border-left: 1px solid #1b252d;
-  background: #070a0d;
   overflow-y: auto;
+  border-left: 1px solid #1b252d;
 }
 
 .playerSearch {
@@ -1094,22 +853,6 @@ nav {
 
 .playerSearch input {
   width: 100%;
-  height: 32px;
-  padding: 0 12px;
-  outline: none;
-  border: 1px solid #26323b;
-  border-radius: 5px;
-  background: #090e12;
-  color: #dfe6ea;
-  font-size: 8px;
-}
-
-.playerSearch input:focus {
-  border-color: #0c7943;
-}
-
-.playerSearch input::placeholder {
-  color: #52606a;
 }
 
 .serverConnection {
@@ -1121,17 +864,6 @@ nav {
   font-size: 7px;
 }
 
-.playerList {
-  width: 100%;
-}
-
-.playerPanelMessage {
-  padding: 25px 15px;
-  color: #64727c;
-  font-size: 8px;
-  text-align: center;
-}
-
 .playerCard {
   min-height: 67px;
   padding: 11px 10px;
@@ -1140,13 +872,6 @@ nav {
   gap: 10px;
   border-left: 2px solid transparent;
   border-bottom: 1px solid #141d23;
-  background: #070a0d;
-  cursor: pointer;
-  transition: 0.15s ease;
-}
-
-.playerCard:hover {
-  background: #0a1110;
 }
 
 .selectedPlayerRow {
@@ -1154,66 +879,23 @@ nav {
   background: #0a1c13;
 }
 
-.playerAvatar {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid #293640;
-  border-radius: 6px;
-  background: #10161b;
-  color: #dfe6ea;
-  font-size: 14px;
-  font-weight: 700;
-}
-
 .playerInfo {
   flex: 1;
-  min-width: 0;
 }
 
 .playerName {
-  overflow: hidden;
-  color: #f0f4f6;
   font-size: 9px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
-.realPlayerId {
-  margin-top: 2px;
-  color: #586772;
+.realPlayerId,
+.flags {
+  margin-top: 3px;
   font-size: 6px;
 }
 
 .flags {
-  margin-top: 3px;
   color: #00e676;
-  font-size: 6px;
-  font-weight: 700;
 }
-
-.watchButton {
-  height: 24px;
-  padding: 0 10px;
-  border: 1px solid #086c3a;
-  border-radius: 4px;
-  background: #062417;
-  color: #00e676;
-  font-size: 6px;
-  font-weight: 700;
-}
-
-.watchButton:hover {
-  background: #0a3a24;
-}
-
-/* =========================================================
-   INTERACTIVE MAP
-   ========================================================= */
 
 .mapBoard {
   position: relative;
@@ -1229,30 +911,8 @@ nav {
   background-size: 40px 40px;
 }
 
-.mapBoard::before,
-.mapBoard::after {
-  content: "";
-  position: absolute;
-  background: rgba(0, 230, 118, 0.15);
-}
-
-.mapBoard::before {
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 1px;
-}
-
-.mapBoard::after {
-  top: 0;
-  left: 50%;
-  width: 1px;
-  height: 100%;
-}
-
 .mapPlayerDot {
   position: absolute;
-  z-index: 5;
   width: 28px;
   height: 28px;
   transform: translate(-50%, -50%);
@@ -1262,27 +922,16 @@ nav {
   color: #00e676;
   font-size: 9px;
   font-weight: 800;
-  box-shadow: 0 0 15px rgba(0, 230, 118, 0.25);
-}
-
-.mapPlayerDot:hover {
-  background: #0b4a2c;
-  transform: translate(-50%, -50%) scale(1.1);
 }
 
 .mapCenterCross {
   position: absolute;
   top: 50%;
   left: 50%;
-  z-index: 2;
   transform: translate(-50%, -50%);
   color: #23553c;
   font-size: 24px;
 }
-
-/* =========================================================
-   CONSOLE
-   ========================================================= */
 
 .consoleBox {
   min-height: 420px;
@@ -1291,10 +940,7 @@ nav {
   border: 1px solid #1e2930;
   border-radius: 6px;
   background: #040709;
-  font-family:
-    "Cascadia Code",
-    Consolas,
-    monospace;
+  font-family: Consolas, monospace;
 }
 
 .consoleLine {
@@ -1302,23 +948,9 @@ nav {
   padding: 8px 11px;
   display: grid;
   grid-template-columns: 75px 65px 1fr;
-  align-items: center;
   gap: 10px;
   border-bottom: 1px solid #10171c;
   font-size: 8px;
-}
-
-.consoleLine span {
-  color: #52616b;
-}
-
-.consoleLine strong {
-  text-transform: uppercase;
-  font-size: 7px;
-}
-
-.consoleLine p {
-  color: #9eabb3;
 }
 
 .consoleLine.info strong {
@@ -1337,104 +969,34 @@ nav {
   color: #ff5b5b;
 }
 
-/* =========================================================
-   LOOKUP
-   ========================================================= */
-
-.lookupGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.lookupCard {
+.lookupCard,
+.vehicleCard {
   padding: 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  border: 1px solid #202b33;
-  border-radius: 7px;
-  background: #070b0e;
 }
 
-.lookupCard .playerAvatar {
-  margin-bottom: 12px;
-}
-
-.lookupCard h3 {
-  color: #f1f5f7;
+.lookupCard h3,
+.vehicleCard h3 {
+  margin-top: 7px;
   font-size: 12px;
 }
 
-.lookupCard > span {
-  margin-top: 3px;
-  color: #61707a;
-  font-size: 7px;
-}
-
-.lookupCard p {
+.lookupCard p,
+.vehicleCard p {
   margin-top: 7px;
   color: #89969e;
   font-size: 8px;
 }
 
-.lookupCard .smallButton {
-  margin-top: 14px;
+.panelMessage {
+  padding: 45px 20px;
+  color: #65737d;
+  font-size: 9px;
+  text-align: center;
 }
-
-/* =========================================================
-   VEHICLES
-   ========================================================= */
-
-.vehicleGrid {
-  margin-top: 18px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.vehicleCard {
-  padding: 18px;
-  border: 1px solid #202b33;
-  border-radius: 7px;
-  background: #070b0e;
-}
-
-.vehicleCard > span {
-  color: #00e676;
-  font-size: 6px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-}
-
-.vehicleCard h3 {
-  margin-top: 7px;
-  color: #f0f4f6;
-  font-size: 14px;
-}
-
-.vehicleCard p {
-  margin-top: 8px;
-  color: #7b8992;
-  font-size: 8px;
-  line-height: 1.5;
-}
-
-.vehicleCard .smallButton {
-  margin-top: 14px;
-}
-
-/* =========================================================
-   SCROLLBARS
-   ========================================================= */
 
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #06090b;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -1442,15 +1004,12 @@ nav {
   background: #263139;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #35434c;
-}
+@media (max-width: 1100px) {
+  .statsGrid,
+  .simpleGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 1200px) {
   .lookupGrid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -1459,34 +1018,15 @@ nav {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .simpleGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 1100px) {
   .playerPanel {
     width: 260px;
     min-width: 260px;
-  }
-
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .livePlayerCard {
-    width: 460px;
   }
 }
 
 @media (max-width: 850px) {
   body {
     overflow: auto;
-  }
-
-  .panel {
-    min-height: 100vh;
-    height: auto;
   }
 
   .sidebar {
@@ -1501,30 +1041,27 @@ nav {
   .playerPanel {
     width: 100%;
     min-width: 100%;
-    max-height: 260px;
-    border-top: 1px solid #1b252d;
     border-left: none;
+    border-top: 1px solid #1b252d;
   }
 
-  .monitorToolbar {
-    flex-wrap: wrap;
-  }
-
-  .ready {
-    margin-left: 0;
-  }
-
+  .statsGrid,
+  .simpleGrid,
   .serverDetails,
   .liveStatsGrid,
   .positionGrid,
   .commandGrid,
-  .simpleGrid {
-    grid-template-columns: 1fr;
-  }
-
   .lookupGrid,
   .vehicleGrid {
     grid-template-columns: 1fr;
+  }
+
+  .commandGrid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .livePlayerCard {
+    width: calc(100% - 30px);
   }
 
   .table {
@@ -1534,13 +1071,5 @@ nav {
   .tableHead,
   .tableRow {
     min-width: 750px;
-  }
-
-  .livePlayerCard {
-    width: calc(100% - 30px);
-  }
-
-  .mapBoard {
-    height: 420px;
   }
 }
