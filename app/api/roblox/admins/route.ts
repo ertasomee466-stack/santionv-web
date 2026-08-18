@@ -2,50 +2,102 @@ import { Redis } from "@upstash/redis";
 
 const redis = Redis.fromEnv();
 
+type AdminPermission =
+  | "players"
+  | "commands"
+  | "bans"
+  | "vehicles"
+  | "logs"
+  | "config"
+  | "admins";
+
 type AdminRecord = {
   userId: number;
   username: string;
   displayName?: string;
 
-  level: number;
   role: string;
+  level: number;
 
-  permissions: string[];
+  permissions: AdminPermission[];
+
+  active: boolean;
 
   addedBy: string;
   createdAt: number;
-
-  active: boolean;
+  updatedAt: number;
 };
 
 type AdminRequest = {
-  action?: "add" | "remove" | "update";
+  action?: "add" | "update" | "remove";
 
   userId?: number;
+
   username?: string;
   displayName?: string;
 
-  level?: number;
   role?: string;
+  level?: number;
 
-  permissions?: string[];
+  permissions?: AdminPermission[];
+
+  active?: boolean;
 
   addedBy?: string;
 };
+
+const ADMIN_SET_KEY = "santionv:admins";
+
+const allowedPermissions: AdminPermission[] = [
+  "players",
+  "commands",
+  "bans",
+  "vehicles",
+  "logs",
+  "config",
+  "admins",
+];
 
 function adminKey(userId: number) {
   return `santionv:admin:${userId}`;
 }
 
+function normalizePermissions(
+  permissions: unknown
+): AdminPermission[] {
+  if (!Array.isArray(permissions)) {
+    return [];
+  }
+
+  return permissions
+    .map(String)
+    .filter((permission): permission is AdminPermission =>
+      allowedPermissions.includes(
+        permission as AdminPermission
+      )
+    );
+}
+
+/* =========================================================
+   GET
+   /api/roblox/admins
+   /api/roblox/admins?userId=123
+   ========================================================= */
+
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
 
-    const userIdParam =
+    const userIdValue =
       url.searchParams.get("userId");
 
-    if (userIdParam) {
-      const userId = Number(userIdParam);
+    /* -----------------------------------------------------
+       TEK ADMIN KONTROLÜ
+       Roblox WebPanelService bunu kullanır.
+       ----------------------------------------------------- */
+
+    if (userIdValue) {
+      const userId = Number(userIdValue);
 
       if (
         !Number.isFinite(userId) ||
@@ -54,6 +106,8 @@ export async function GET(request: Request) {
         return Response.json(
           {
             success: false,
+            isAdmin: false,
+            admin: null,
             message: "Invalid userId",
           },
           {
@@ -82,17 +136,27 @@ export async function GET(request: Request) {
       });
     }
 
+    /* -----------------------------------------------------
+       TÜM ADMINLER
+       ----------------------------------------------------- */
+
     const ids =
-      await redis.smembers(
-        "santionv:admins"
-      );
+      await redis.smembers(ADMIN_SET_KEY);
 
     const admins: AdminRecord[] = [];
 
     for (const rawId of ids) {
       const userId = Number(rawId);
 
-      if (!Number.isFinite(userId)) {
+      if (
+        !Number.isFinite(userId) ||
+        userId <= 0
+      ) {
+        await redis.srem(
+          ADMIN_SET_KEY,
+          String(rawId)
+        );
+
         continue;
       }
 
@@ -103,7 +167,7 @@ export async function GET(request: Request) {
 
       if (!admin) {
         await redis.srem(
-          "santionv:admins",
+          ADMIN_SET_KEY,
           String(userId)
         );
 
@@ -126,6 +190,7 @@ export async function GET(request: Request) {
     return Response.json({
       success: true,
       admins,
+      count: admins.length,
     });
   } catch (error) {
     console.error(
@@ -136,6 +201,7 @@ export async function GET(request: Request) {
     return Response.json(
       {
         success: false,
+        admins: [],
         message:
           "Admin data could not be loaded",
       },
@@ -145,6 +211,11 @@ export async function GET(request: Request) {
     );
   }
 }
+
+/* =========================================================
+   POST
+   ADD / UPDATE / REMOVE
+   ========================================================= */
 
 export async function POST(
   request: Request
@@ -159,16 +230,14 @@ export async function POST(
 
     if (
       !action ||
-      !["add", "remove", "update"].includes(
+      !["add", "update", "remove"].includes(
         action
-      ) ||
-      !Number.isFinite(userId) ||
-      userId <= 0
+      )
     ) {
       return Response.json(
         {
           success: false,
-          message: "Invalid request",
+          message: "Invalid admin action",
         },
         {
           status: 400,
@@ -176,11 +245,32 @@ export async function POST(
       );
     }
 
+    if (
+      !Number.isFinite(userId) ||
+      userId <= 0
+    ) {
+      return Response.json(
+        {
+          success: false,
+          message: "Invalid userId",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    /* =====================================================
+       REMOVE ADMIN
+       ===================================================== */
+
     if (action === "remove") {
-      await redis.del(adminKey(userId));
+      await redis.del(
+        adminKey(userId)
+      );
 
       await redis.srem(
-        "santionv:admins",
+        ADMIN_SET_KEY,
         String(userId)
       );
 
@@ -191,39 +281,50 @@ export async function POST(
       });
     }
 
+    /* =====================================================
+       ADD / UPDATE
+       ===================================================== */
+
     const existing =
       await redis.get<AdminRecord>(
         adminKey(userId)
       );
 
-    const level = Number(
+    const levelValue = Number(
       body.level ?? existing?.level ?? 1
     );
 
+    const level =
+      Number.isFinite(levelValue) &&
+      levelValue > 0
+        ? Math.floor(levelValue)
+        : 1;
+
     const permissions =
-      Array.isArray(body.permissions)
-        ? body.permissions.map(String)
+      body.permissions !== undefined
+        ? normalizePermissions(
+            body.permissions
+          )
         : existing?.permissions ?? [];
+
+    const now = Date.now();
 
     const admin: AdminRecord = {
       userId,
 
       username:
-        typeof body.username === "string" &&
+        typeof body.username ===
+          "string" &&
         body.username.trim()
           ? body.username.trim()
           : existing?.username ??
             `User_${userId}`,
 
       displayName:
-        typeof body.displayName === "string"
-          ? body.displayName
+        typeof body.displayName ===
+        "string"
+          ? body.displayName.trim()
           : existing?.displayName,
-
-      level:
-        Number.isFinite(level) && level > 0
-          ? level
-          : 1,
 
       role:
         typeof body.role === "string" &&
@@ -231,19 +332,27 @@ export async function POST(
           ? body.role.trim()
           : existing?.role ?? "Admin",
 
+      level,
+
       permissions,
 
+      active:
+        body.active !== undefined
+          ? Boolean(body.active)
+          : existing?.active ?? true,
+
       addedBy:
-        typeof body.addedBy === "string" &&
+        typeof body.addedBy ===
+          "string" &&
         body.addedBy.trim()
           ? body.addedBy.trim()
           : existing?.addedBy ??
             "SantionV Web Panel",
 
       createdAt:
-        existing?.createdAt ?? Date.now(),
+        existing?.createdAt ?? now,
 
-      active: true,
+      updatedAt: now,
     };
 
     await redis.set(
@@ -252,12 +361,13 @@ export async function POST(
     );
 
     await redis.sadd(
-      "santionv:admins",
+      ADMIN_SET_KEY,
       String(userId)
     );
 
     return Response.json({
       success: true,
+
       message:
         action === "update"
           ? "Admin updated"
