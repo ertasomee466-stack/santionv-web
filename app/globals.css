@@ -1,6 +1,6 @@
 /* =========================================================
    SANTIONV ROBLOX ADMIN PANEL
-   FULL GLOBAL STYLES
+   FULL GLOBALS.CSS
    ========================================================= */
 
 * {
@@ -41,19 +41,19 @@ button {
 
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 /* =========================================================
-   ROOT LAYOUT
+   ROOT
    ========================================================= */
 
 .panel {
   width: 100vw;
   height: 100vh;
   display: flex;
-  background: #05080a;
   overflow: hidden;
+  background: #05080a;
 }
 
 .sidebar {
@@ -62,8 +62,8 @@ button:disabled {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #070a0d;
   border-right: 1px solid #1b252d;
+  background: #070a0d;
 }
 
 .content {
@@ -72,8 +72,8 @@ button:disabled {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #05080a;
   overflow: hidden;
+  background: #05080a;
 }
 
 /* =========================================================
@@ -92,10 +92,10 @@ button:disabled {
 .logoIcon {
   width: 34px;
   height: 34px;
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   border-radius: 9px;
   background: #00e676;
   color: #03150b;
@@ -183,7 +183,7 @@ button:disabled {
 }
 
 /* =========================================================
-   SIDEBAR NAVIGATION
+   NAV
    ========================================================= */
 
 nav {
@@ -287,7 +287,7 @@ nav {
 }
 
 /* =========================================================
-   TOP BAR
+   TOPBAR
    ========================================================= */
 
 .topbar {
@@ -398,7 +398,7 @@ nav {
 }
 
 /* =========================================================
-   MODULE PAGES
+   MODULE PAGE
    ========================================================= */
 
 .modulePage {
@@ -553,6 +553,37 @@ nav {
 }
 
 /* =========================================================
+   SIMPLE GRID
+   ========================================================= */
+
+.simpleGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.simpleInfoCard {
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #202b33;
+  border-radius: 6px;
+  background: #070b0e;
+}
+
+.simpleInfoCard span {
+  color: #8c98a1;
+  font-size: 8px;
+}
+
+.simpleInfoCard strong {
+  color: #00e676;
+  font-size: 15px;
+}
+
+/* =========================================================
    PLAYERS TABLE
    ========================================================= */
 
@@ -613,6 +644,17 @@ nav {
   font-weight: 600;
 }
 
+.tablePlayer > div:last-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.tablePlayer small {
+  margin-top: 2px;
+  color: #5c6972;
+  font-size: 6px;
+}
+
 .tablePlayerAvatar {
   width: 30px;
   height: 30px;
@@ -652,7 +694,7 @@ nav {
 }
 
 /* =========================================================
-   LIVE MONITOR ROOT
+   LIVE MONITOR
    ========================================================= */
 
 .monitor {
@@ -667,10 +709,6 @@ nav {
   display: flex;
   flex-direction: column;
 }
-
-/* =========================================================
-   MONITOR TOOLBAR
-   ========================================================= */
 
 .monitorToolbar {
   min-height: 54px;
@@ -762,7 +800,7 @@ nav {
 }
 
 /* =========================================================
-   SELECTED PLAYER CARD
+   LIVE PLAYER CARD
    ========================================================= */
 
 .selectedCard {
@@ -863,7 +901,7 @@ nav {
 }
 
 /* =========================================================
-   LIVE STATS GRID
+   LIVE STATS
    ========================================================= */
 
 .liveStatsGrid {
@@ -904,7 +942,7 @@ nav {
 }
 
 /* =========================================================
-   LIVE POSITION
+   POSITION
    ========================================================= */
 
 .positionPanel {
@@ -951,7 +989,44 @@ nav {
 }
 
 /* =========================================================
-   EMPTY / RADAR STATE
+   ADMIN COMMAND PREVIEW
+   ========================================================= */
+
+.commandPreview {
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px solid #202c33;
+  border-radius: 6px;
+  background: #070c0f;
+}
+
+.commandGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.commandGrid button {
+  height: 30px;
+  border: 1px solid #28353e;
+  border-radius: 5px;
+  background: #0b1115;
+  color: #73818a;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.commandPreview small {
+  display: block;
+  margin-top: 9px;
+  color: #52606a;
+  font-size: 6px;
+  text-align: center;
+}
+
+/* =========================================================
+   EMPTY STATE
    ========================================================= */
 
 .emptyState {
@@ -1057,10 +1132,6 @@ nav {
   text-align: center;
 }
 
-/* =========================================================
-   PLAYER CARD
-   ========================================================= */
-
 .playerCard {
   min-height: 67px;
   padding: 11px 10px;
@@ -1141,6 +1212,219 @@ nav {
 }
 
 /* =========================================================
+   INTERACTIVE MAP
+   ========================================================= */
+
+.mapBoard {
+  position: relative;
+  width: 100%;
+  height: 560px;
+  overflow: hidden;
+  border: 1px solid #202b33;
+  border-radius: 8px;
+  background-color: #05090b;
+  background-image:
+    linear-gradient(rgba(0, 230, 118, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 230, 118, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.mapBoard::before,
+.mapBoard::after {
+  content: "";
+  position: absolute;
+  background: rgba(0, 230, 118, 0.15);
+}
+
+.mapBoard::before {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+}
+
+.mapBoard::after {
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+}
+
+.mapPlayerDot {
+  position: absolute;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #00a95c;
+  border-radius: 50%;
+  background: #07331f;
+  color: #00e676;
+  font-size: 9px;
+  font-weight: 800;
+  box-shadow: 0 0 15px rgba(0, 230, 118, 0.25);
+}
+
+.mapPlayerDot:hover {
+  background: #0b4a2c;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.mapCenterCross {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  color: #23553c;
+  font-size: 24px;
+}
+
+/* =========================================================
+   CONSOLE
+   ========================================================= */
+
+.consoleBox {
+  min-height: 420px;
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid #1e2930;
+  border-radius: 6px;
+  background: #040709;
+  font-family:
+    "Cascadia Code",
+    Consolas,
+    monospace;
+}
+
+.consoleLine {
+  min-height: 34px;
+  padding: 8px 11px;
+  display: grid;
+  grid-template-columns: 75px 65px 1fr;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #10171c;
+  font-size: 8px;
+}
+
+.consoleLine span {
+  color: #52616b;
+}
+
+.consoleLine strong {
+  text-transform: uppercase;
+  font-size: 7px;
+}
+
+.consoleLine p {
+  color: #9eabb3;
+}
+
+.consoleLine.info strong {
+  color: #63a9ff;
+}
+
+.consoleLine.success strong {
+  color: #00e676;
+}
+
+.consoleLine.warning strong {
+  color: #ffd740;
+}
+
+.consoleLine.error strong {
+  color: #ff5b5b;
+}
+
+/* =========================================================
+   LOOKUP
+   ========================================================= */
+
+.lookupGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lookupCard {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid #202b33;
+  border-radius: 7px;
+  background: #070b0e;
+}
+
+.lookupCard .playerAvatar {
+  margin-bottom: 12px;
+}
+
+.lookupCard h3 {
+  color: #f1f5f7;
+  font-size: 12px;
+}
+
+.lookupCard > span {
+  margin-top: 3px;
+  color: #61707a;
+  font-size: 7px;
+}
+
+.lookupCard p {
+  margin-top: 7px;
+  color: #89969e;
+  font-size: 8px;
+}
+
+.lookupCard .smallButton {
+  margin-top: 14px;
+}
+
+/* =========================================================
+   VEHICLES
+   ========================================================= */
+
+.vehicleGrid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.vehicleCard {
+  padding: 18px;
+  border: 1px solid #202b33;
+  border-radius: 7px;
+  background: #070b0e;
+}
+
+.vehicleCard > span {
+  color: #00e676;
+  font-size: 6px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.vehicleCard h3 {
+  margin-top: 7px;
+  color: #f0f4f6;
+  font-size: 14px;
+}
+
+.vehicleCard p {
+  margin-top: 8px;
+  color: #7b8992;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.vehicleCard .smallButton {
+  margin-top: 14px;
+}
+
+/* =========================================================
    SCROLLBARS
    ========================================================= */
 
@@ -1165,6 +1449,20 @@ nav {
 /* =========================================================
    RESPONSIVE
    ========================================================= */
+
+@media (max-width: 1200px) {
+  .lookupGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .vehicleGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .simpleGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
 @media (max-width: 1100px) {
   .playerPanel {
@@ -1216,10 +1514,16 @@ nav {
     margin-left: 0;
   }
 
-  .selectedStats,
   .serverDetails,
   .liveStatsGrid,
-  .positionGrid {
+  .positionGrid,
+  .commandGrid,
+  .simpleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .lookupGrid,
+  .vehicleGrid {
     grid-template-columns: 1fr;
   }
 
@@ -1234,5 +1538,9 @@ nav {
 
   .livePlayerCard {
     width: calc(100% - 30px);
+  }
+
+  .mapBoard {
+    height: 420px;
   }
 }
