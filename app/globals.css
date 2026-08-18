@@ -13,7 +13,14 @@ body {
 body {
   background: #05080a;
   color: #e8edf2;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   overflow: hidden;
 }
 
@@ -28,9 +35,11 @@ button {
 }
 
 button:disabled {
-  opacity: 0.45;
   cursor: not-allowed;
+  opacity: 0.45;
 }
+
+/* ROOT */
 
 .panel {
   width: 100vw;
@@ -57,7 +66,10 @@ button:disabled {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #05080a;
 }
+
+/* LOGO */
 
 .logo {
   height: 52px;
@@ -81,8 +93,7 @@ button:disabled {
   font-weight: 900;
 }
 
-.logo > div:last-child,
-.account > div:last-child {
+.logo > div:last-child {
   display: flex;
   flex-direction: column;
 }
@@ -91,13 +102,14 @@ button:disabled {
   font-size: 11px;
 }
 
-.logo span,
-.account span {
+.logo span {
   margin-top: 2px;
   color: #65727c;
   font-size: 7px;
   letter-spacing: 1px;
 }
+
+/* SERVER */
 
 .serverSelector {
   margin: 15px 12px 13px;
@@ -113,6 +125,7 @@ button:disabled {
 
 .serverSelector > div {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -124,12 +137,14 @@ button:disabled {
 
 .serverSelector strong {
   margin-top: 2px;
+  overflow: hidden;
   font-size: 9px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .serverDot,
-.statusDot,
-.connectionDot {
+.statusDot {
   width: 7px;
   height: 7px;
   flex-shrink: 0;
@@ -139,11 +154,12 @@ button:disabled {
 }
 
 .serverDotOffline,
-.statusDotOffline,
-.connectionDot.offline {
+.statusDotOffline {
   background: #ff4d4d;
   box-shadow: 0 0 10px rgba(255, 77, 77, 0.55);
 }
+
+/* NAV */
 
 nav {
   flex: 1;
@@ -190,6 +206,8 @@ nav {
   color: #00e676;
 }
 
+/* ACCOUNT */
+
 .account {
   min-height: 55px;
   padding: 10px 16px;
@@ -210,9 +228,22 @@ nav {
   color: #00e676;
 }
 
+.account > div:last-child {
+  display: flex;
+  flex-direction: column;
+}
+
 .account strong {
   font-size: 9px;
 }
+
+.account span {
+  margin-top: 2px;
+  color: #65727c;
+  font-size: 7px;
+}
+
+/* TOPBAR */
 
 .topbar {
   height: 36px;
@@ -244,6 +275,8 @@ nav {
   background: #0a0f13;
   color: #8c9aa4;
 }
+
+/* PAGE HEADER */
 
 .pageHeader {
   min-height: 72px;
@@ -296,6 +329,8 @@ nav {
   background: #ff4d4d;
 }
 
+/* MODULE */
+
 .modulePage {
   flex: 1;
   min-height: 0;
@@ -303,70 +338,23 @@ nav {
   overflow-y: auto;
 }
 
-.statsGrid,
-.simpleGrid,
-.serverDetails,
-.liveStatsGrid,
-.positionGrid,
-.commandGrid,
-.lookupGrid,
-.vehicleGrid {
-  display: grid;
-  gap: 10px;
-}
-
 .statsGrid {
+  display: grid;
   grid-template-columns: repeat(4, 1fr);
-}
-
-.simpleGrid {
-  margin-top: 16px;
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.serverDetails {
-  margin-top: 20px;
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.liveStatsGrid,
-.positionGrid,
-.commandGrid {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.lookupGrid {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.vehicleGrid {
-  margin-top: 18px;
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.statCard,
-.simpleInfoCard,
-.serverDetails > div,
-.liveStatsGrid > div,
-.positionGrid > div,
-.lookupCard,
-.vehicleCard {
-  border: 1px solid #202b33;
-  border-radius: 7px;
-  background: #080d11;
+  gap: 12px;
 }
 
 .statCard {
   min-height: 115px;
   padding: 18px;
+  border: 1px solid #202b33;
+  border-radius: 8px;
+  background: #080d11;
 }
 
-.statCard > span,
-.serverDetails span,
-.liveStatsGrid span,
-.positionGrid span {
+.statCard > span {
   color: #63727c;
-  font-size: 6px;
+  font-size: 7px;
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -384,13 +372,6 @@ nav {
   font-size: 7px;
 }
 
-.simpleInfoCard {
-  padding: 14px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.simpleInfoCard strong,
 .greenText {
   color: #00e676 !important;
 }
@@ -398,6 +379,8 @@ nav {
 .redText {
   color: #ff5757 !important;
 }
+
+/* LARGE PANEL */
 
 .largePanel {
   margin-top: 15px;
@@ -430,10 +413,8 @@ nav {
   gap: 20px;
 }
 
-.normalInput,
-.playerSearch input,
-.kickReasonInput,
-.commandTargetArea select {
+.normalInput {
+  width: 220px;
   height: 32px;
   padding: 0 11px;
   outline: none;
@@ -444,26 +425,93 @@ nav {
   font-size: 8px;
 }
 
-.normalInput {
-  width: 220px;
+.normalInput:focus {
+  border-color: #0c7943;
 }
 
-.normalInput:focus,
-.playerSearch input:focus,
-.kickReasonInput:focus,
-.commandTargetArea select:focus {
-  border-color: #0c7943;
+/* SERVER DETAILS */
+
+.serverDetails {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
 .serverDetails > div {
   padding: 14px;
+  border: 1px solid #202b33;
+  border-radius: 6px;
+  background: #070b0e;
+}
+
+.serverDetails span {
+  color: #586772;
+  font-size: 6px;
 }
 
 .serverDetails strong {
   display: block;
   margin-top: 6px;
   font-size: 9px;
+  overflow-wrap: anywhere;
 }
+
+/* CONFIG */
+
+.configGrid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.configToggle {
+  min-height: 48px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #202b33;
+  border-radius: 6px;
+  background: #070b0e;
+  color: #d8e0e4;
+  font-size: 8px;
+}
+
+.configToggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: #00e676;
+}
+
+.configTextGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.configTextGrid label {
+  color: #77858e;
+  font-size: 7px;
+}
+
+.configTextGrid input {
+  width: 100%;
+  height: 34px;
+  margin-top: 7px;
+  padding: 0 11px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
+}
+
+/* TABLE */
 
 .table {
   width: 100%;
@@ -502,64 +550,28 @@ nav {
   font-size: 8px;
 }
 
-.tablePlayer {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.tablePlayer > div:last-child {
-  display: flex;
-  flex-direction: column;
-}
-
-.tablePlayer small {
-  margin-top: 2px;
-  color: #5c6972;
-  font-size: 6px;
-}
-
-.tablePlayerAvatar,
-.playerAvatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #293640;
-  border-radius: 6px;
-  background: #10161b;
-  font-weight: 800;
-}
-
-.tablePlayerAvatar {
-  width: 30px;
-  height: 30px;
-}
-
-.playerAvatar {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-}
-
 .smallButton,
-.watchButton {
-  border: 1px solid #086c3a;
+.dangerButton {
+  height: 28px;
+  padding: 0 11px;
   border-radius: 4px;
-  background: #062417;
-  color: #00e676;
   font-size: 6px;
   font-weight: 700;
 }
 
 .smallButton {
-  height: 26px;
-  padding: 0 11px;
+  border: 1px solid #086c3a;
+  background: #062417;
+  color: #00e676;
 }
 
-.watchButton {
-  height: 24px;
-  padding: 0 10px;
+.dangerButton {
+  border: 1px solid #7b2929;
+  background: #2c0c0c;
+  color: #ff6c6c;
 }
+
+/* LIVE MONITOR */
 
 .monitor {
   flex: 1;
@@ -584,7 +596,8 @@ nav {
 }
 
 .monitorToolbar select,
-.monitorToolbar button {
+.monitorToolbar button,
+.commandSelect {
   height: 32px;
   border: 1px solid #26323b;
   border-radius: 5px;
@@ -593,31 +606,17 @@ nav {
   font-size: 7px;
 }
 
+.monitorToolbar select,
+.commandSelect {
+  padding: 0 11px;
+}
+
 .monitorToolbar select {
   width: 180px;
-  padding: 0 11px;
 }
 
 .monitorToolbar button {
   padding: 0 13px;
-}
-
-.greenButton {
-  border-color: #08763e !important;
-  background: #07301d !important;
-  color: #00e676 !important;
-}
-
-.yellowButton {
-  border-color: #6d5410 !important;
-  background: #2a2105 !important;
-  color: #ffd740 !important;
-}
-
-.redButton {
-  border-color: #712525 !important;
-  background: #2c0c0c !important;
-  color: #ff6262 !important;
 }
 
 .ready {
@@ -640,7 +639,11 @@ nav {
   background-color: #05080a;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    );
   background-size: 32px 32px;
 }
 
@@ -683,13 +686,6 @@ nav {
 
 .selectedCard h2 {
   margin-top: 6px;
-  font-size: 21px;
-}
-
-.displayNameText {
-  margin-top: 3px;
-  color: #697782;
-  font-size: 9px;
 }
 
 .healthBlock {
@@ -723,11 +719,22 @@ nav {
 .liveStatsGrid {
   width: 100%;
   margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
-.liveStatsGrid > div,
-.positionGrid > div {
-  padding: 10px 8px;
+.liveStatsGrid > div {
+  padding: 10px;
+  border: 1px solid #202b33;
+  border-radius: 6px;
+  background: #090e12;
+}
+
+.liveStatsGrid span,
+.positionGrid span {
+  color: #63727c;
+  font-size: 6px;
 }
 
 .liveStatsGrid strong,
@@ -755,24 +762,34 @@ nav {
   letter-spacing: 1.5px;
 }
 
+.positionGrid,
 .commandGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 7px;
+}
+
+.positionGrid > div {
+  padding: 9px;
+  border: 1px solid #202b33;
+  border-radius: 5px;
+  background: #0a1014;
 }
 
 .commandGrid button {
   height: 30px;
-  border: 1px solid #28353e;
+  border: 1px solid #086c3a;
   border-radius: 5px;
-  background: #0b1115;
-  color: #73818a;
+  background: #062417;
+  color: #00e676;
   font-size: 7px;
   font-weight: 700;
 }
 
-.commandGrid button:not(:disabled) {
-  border-color: #086c3a;
-  background: #062417;
-  color: #00e676;
+.commandGrid button:disabled {
+  border-color: #28353e;
+  background: #0b1115;
+  color: #73818a;
 }
 
 .commandGrid.two {
@@ -780,64 +797,24 @@ nav {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.commandTargetArea {
-  width: 100%;
-  margin-top: 10px;
-}
-
-.commandTargetArea select {
-  width: 100%;
-}
-
+.commandSelect,
 .kickReasonInput {
   width: 100%;
   margin-top: 10px;
 }
 
-.commandPreview small {
-  display: block;
-  margin-top: 9px;
-  color: #52606a;
-  font-size: 6px;
-  text-align: center;
+.kickReasonInput {
+  height: 32px;
+  padding: 0 11px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
 }
 
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #66747e;
-}
-
-.emptyState h2 {
-  margin-top: 15px;
-}
-
-.emptyState p {
-  margin-top: 6px;
-  font-size: 9px;
-}
-
-.radar {
-  width: 70px;
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #16442e;
-  border-radius: 50%;
-}
-
-.radarDot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #00e676;
-}
-
-.offlineDot {
-  background: #ff4d4d;
-}
+/* PLAYER PANEL */
 
 .playerPanel {
   width: 310px;
@@ -853,15 +830,14 @@ nav {
 
 .playerSearch input {
   width: 100%;
-}
-
-.serverConnection {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #77858e;
-  font-size: 7px;
+  height: 32px;
+  padding: 0 11px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
 }
 
 .playerCard {
@@ -870,13 +846,19 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-  border-left: 2px solid transparent;
   border-bottom: 1px solid #141d23;
 }
 
-.selectedPlayerRow {
-  border-left-color: #00e676;
-  background: #0a1c13;
+.playerAvatar {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #293640;
+  border-radius: 6px;
+  background: #10161b;
 }
 
 .playerInfo {
@@ -887,27 +869,49 @@ nav {
   font-size: 9px;
 }
 
-.realPlayerId,
-.flags {
+.realPlayerId {
   margin-top: 3px;
+  color: #65727c;
   font-size: 6px;
 }
 
-.flags {
-  color: #00e676;
+/* EMPTY */
+
+.emptyState {
+  text-align: center;
+  color: #66747e;
 }
+
+.emptyState h2 {
+  color: #dce3e7;
+}
+
+.emptyState p {
+  margin-top: 6px;
+  font-size: 9px;
+}
+
+/* MAP */
 
 .mapBoard {
   position: relative;
   width: 100%;
   height: 560px;
   overflow: hidden;
+  margin-top: 16px;
   border: 1px solid #202b33;
   border-radius: 8px;
   background-color: #05090b;
   background-image:
-    linear-gradient(rgba(0, 230, 118, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 230, 118, 0.04) 1px, transparent 1px);
+    linear-gradient(
+      rgba(0, 230, 118, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 230, 118, 0.04) 1px,
+      transparent 1px
+    );
   background-size: 40px 40px;
 }
 
@@ -924,13 +928,11 @@ nav {
   font-weight: 800;
 }
 
-.mapCenterCross {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #23553c;
-  font-size: 24px;
+/* CONSOLE */
+
+.inlineButtons {
+  display: flex;
+  gap: 7px;
 }
 
 .consoleBox {
@@ -947,7 +949,7 @@ nav {
   min-height: 34px;
   padding: 8px 11px;
   display: grid;
-  grid-template-columns: 75px 65px 1fr;
+  grid-template-columns: 80px 70px 1fr;
   gap: 10px;
   border-bottom: 1px solid #10171c;
   font-size: 8px;
@@ -969,23 +971,186 @@ nav {
   color: #ff5b5b;
 }
 
-.lookupCard,
-.vehicleCard {
-  padding: 18px;
+.consoleLine.admin strong {
+  color: #c97cff;
 }
 
-.lookupCard h3,
-.vehicleCard h3 {
-  margin-top: 7px;
+.consoleLine.vehicle strong {
+  color: #66d7ff;
+}
+
+.consoleLine.ban strong {
+  color: #ff6868;
+}
+
+.consoleLine.player strong {
+  color: #00e676;
+}
+
+/* LOOKUP */
+
+.lookupGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.lookupCard {
+  padding: 18px;
+  border: 1px solid #202b33;
+  border-radius: 7px;
+  background: #070b0e;
+}
+
+.lookupCard h3 {
   font-size: 12px;
 }
 
-.lookupCard p,
+.lookupCard p {
+  margin-top: 7px;
+  color: #89969e;
+  font-size: 8px;
+}
+
+.lookupCard button {
+  margin-top: 14px;
+}
+
+/* VEHICLES */
+
+.vehicleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.vehicleCard {
+  padding: 18px;
+  border: 1px solid #202b33;
+  border-radius: 7px;
+  background: #070b0e;
+}
+
+.vehicleCard > span {
+  color: #00e676;
+  font-size: 6px;
+}
+
+.vehicleCard h3 {
+  margin-top: 7px;
+  font-size: 13px;
+}
+
 .vehicleCard p {
   margin-top: 7px;
   color: #89969e;
   font-size: 8px;
 }
+
+/* FORMS */
+
+.formGrid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.formGrid input {
+  width: 100%;
+  height: 34px;
+  padding: 0 11px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
+}
+
+.checkboxLine {
+  min-height: 34px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  font-size: 8px;
+}
+
+.checkboxLine input {
+  width: 15px;
+  height: 15px;
+  accent-color: #00e676;
+}
+
+/* BANS */
+
+.banList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.banCard {
+  padding: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  border: 1px solid #322329;
+  border-radius: 6px;
+  background: #0f090b;
+}
+
+.banCard > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.banCard strong {
+  font-size: 10px;
+}
+
+.banCard span {
+  color: #8e7a80;
+  font-size: 7px;
+}
+
+/* ADMINS */
+
+.adminGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.adminCard {
+  padding: 16px;
+  border: 1px solid #202b33;
+  border-radius: 7px;
+  background: #070b0e;
+}
+
+.adminCard h3 {
+  font-size: 12px;
+}
+
+.adminCard p {
+  margin-top: 6px;
+  color: #89969e;
+  font-size: 8px;
+}
+
+.adminCard button {
+  margin-top: 13px;
+}
+
+/* MESSAGES */
 
 .panelMessage {
   padding: 45px 20px;
@@ -993,6 +1158,8 @@ nav {
   font-size: 9px;
   text-align: center;
 }
+
+/* SCROLL */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -1004,29 +1171,47 @@ nav {
   background: #263139;
 }
 
-@media (max-width: 1100px) {
+/* RESPONSIVE */
+
+@media (max-width: 1200px) {
   .statsGrid,
-  .simpleGrid {
+  .configGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .lookupGrid {
+  .lookupGrid,
+  .adminGrid {
     grid-template-columns: repeat(3, 1fr);
   }
 
   .vehicleGrid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
 
+@media (max-width: 950px) {
   .playerPanel {
-    width: 260px;
-    min-width: 260px;
+    width: 250px;
+    min-width: 250px;
+  }
+
+  .liveStatsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .formGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 850px) {
+@media (max-width: 800px) {
   body {
     overflow: auto;
+  }
+
+  .panel {
+    min-height: 100vh;
+    height: auto;
   }
 
   .sidebar {
@@ -1041,22 +1226,22 @@ nav {
   .playerPanel {
     width: 100%;
     min-width: 100%;
-    border-left: none;
     border-top: 1px solid #1b252d;
+    border-left: none;
   }
 
   .statsGrid,
-  .simpleGrid,
+  .configGrid,
+  .configTextGrid,
   .serverDetails,
   .liveStatsGrid,
   .positionGrid,
   .commandGrid,
+  .commandGrid.two,
   .lookupGrid,
-  .vehicleGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .commandGrid.two {
+  .vehicleGrid,
+  .formGrid,
+  .adminGrid {
     grid-template-columns: 1fr;
   }
 
