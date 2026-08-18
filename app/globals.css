@@ -35,8 +35,8 @@ button {
 }
 
 button:disabled {
-  cursor: not-allowed;
   opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* ROOT */
@@ -66,7 +66,6 @@ button:disabled {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #05080a;
 }
 
 /* LOGO */
@@ -276,7 +275,7 @@ nav {
   color: #8c9aa4;
 }
 
-/* PAGE HEADER */
+/* HEADER */
 
 .pageHeader {
   min-height: 72px;
@@ -380,7 +379,7 @@ nav {
   color: #ff5757 !important;
 }
 
-/* LARGE PANEL */
+/* PANELS */
 
 .largePanel {
   margin-top: 15px;
@@ -453,8 +452,8 @@ nav {
 .serverDetails strong {
   display: block;
   margin-top: 6px;
-  font-size: 9px;
   overflow-wrap: anywhere;
+  font-size: 9px;
 }
 
 /* CONFIG */
@@ -551,21 +550,25 @@ nav {
 }
 
 .smallButton,
-.dangerButton {
-  height: 28px;
-  padding: 0 11px;
+.dangerButton,
+.adminToggleButton,
+.adminSaveButton {
   border-radius: 4px;
   font-size: 6px;
   font-weight: 700;
 }
 
 .smallButton {
+  height: 28px;
+  padding: 0 11px;
   border: 1px solid #086c3a;
   background: #062417;
   color: #00e676;
 }
 
 .dangerButton {
+  height: 28px;
+  padding: 0 11px;
   border: 1px solid #7b2929;
   background: #2c0c0c;
   color: #ff6c6c;
@@ -903,10 +906,7 @@ nav {
   border-radius: 8px;
   background-color: #05090b;
   background-image:
-    linear-gradient(
-      rgba(0, 230, 118, 0.04) 1px,
-      transparent 1px
-    ),
+    linear-gradient(rgba(0, 230, 118, 0.04) 1px, transparent 1px),
     linear-gradient(
       90deg,
       rgba(0, 230, 118, 0.04) 1px,
@@ -1047,7 +1047,7 @@ nav {
   font-size: 8px;
 }
 
-/* FORMS */
+/* BANS */
 
 .formGrid {
   margin-top: 18px;
@@ -1086,8 +1086,6 @@ nav {
   accent-color: #00e676;
 }
 
-/* BANS */
-
 .banList {
   display: flex;
   flex-direction: column;
@@ -1120,34 +1118,297 @@ nav {
   font-size: 7px;
 }
 
-/* ADMINS */
+/* ADMINS FORM */
+
+.adminFormGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.adminFormGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #77858e;
+  font-size: 7px;
+}
+
+.adminFormGrid input,
+.adminFormGrid select {
+  width: 100%;
+  height: 34px;
+  padding: 0 11px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
+}
+
+.adminFormGrid input:focus,
+.adminFormGrid select:focus {
+  border-color: #0c7943;
+}
+
+.adminActiveControl {
+  min-height: 58px;
+  padding: 0 12px;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #26323b;
+  border-radius: 6px;
+  background: #090e12;
+}
+
+.adminActiveControl input {
+  width: 17px;
+  height: 17px;
+  accent-color: #00e676;
+}
+
+/* PERMISSIONS */
+
+.permissionSection {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #1a242b;
+}
+
+.permissionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.permissionHeader h3 {
+  font-size: 12px;
+}
+
+.permissionHeader p {
+  margin-top: 4px;
+  color: #65737c;
+  font-size: 7px;
+}
+
+.permissionGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+
+.permissionCard {
+  min-height: 58px;
+  padding: 11px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #26323b;
+  border-radius: 6px;
+  background: #080c10;
+  cursor: pointer;
+}
+
+.permissionCard:hover {
+  border-color: #315040;
+}
+
+.permissionCardActive {
+  border-color: #0a7540;
+  background: #082117;
+}
+
+.permissionCard input {
+  width: 15px;
+  height: 15px;
+  accent-color: #00e676;
+}
+
+.permissionCard > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.permissionCard strong {
+  color: #e7edef;
+  font-size: 8px;
+}
+
+.permissionCard span {
+  margin-top: 3px;
+  color: #5f6d76;
+  font-size: 6px;
+}
+
+.adminSaveArea {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.adminSaveButton {
+  height: 34px;
+  padding: 0 18px;
+  border: 1px solid #087a40;
+  background: #07351f;
+  color: #00e676;
+}
+
+/* ADMIN CARDS */
 
 .adminGrid {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
 .adminCard {
   padding: 16px;
   border: 1px solid #202b33;
-  border-radius: 7px;
+  border-radius: 8px;
   background: #070b0e;
 }
 
-.adminCard h3 {
-  font-size: 12px;
+.adminCardDisabled {
+  opacity: 0.58;
 }
 
-.adminCard p {
-  margin-top: 6px;
-  color: #89969e;
+.adminCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adminAvatar {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #165536;
+  border-radius: 7px;
+  background: #0a2719;
+  color: #00e676;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.adminCardHeader > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.adminCardHeader h3 {
+  overflow: hidden;
+  font-size: 11px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.adminCardHeader span {
+  display: block;
+  margin-top: 3px;
+  color: #6d7b84;
+  font-size: 7px;
+}
+
+.adminStatus {
+  padding: 5px 7px;
+  border: 1px solid #633232;
+  border-radius: 4px;
+  background: #291010;
+  color: #ff6969;
+  font-size: 6px;
+  font-weight: 800;
+}
+
+.adminStatus.active {
+  border-color: #15643c;
+  background: #092819;
+  color: #00e676;
+}
+
+.adminInfoGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.adminInfoGrid > div {
+  padding: 9px;
+  border: 1px solid #1d272e;
+  border-radius: 5px;
+  background: #090d10;
+}
+
+.adminInfoGrid span {
+  color: #5b6972;
+  font-size: 6px;
+}
+
+.adminInfoGrid strong {
+  display: block;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  color: #dbe2e6;
   font-size: 8px;
 }
 
-.adminCard button {
+.adminPermissionList {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.adminPermissionList > span {
+  padding: 5px 7px;
+  border: 1px solid #155032;
+  border-radius: 4px;
+  background: #082016;
+  color: #57de94;
+  font-size: 6px;
+  text-transform: uppercase;
+}
+
+.adminPermissionList .noPermission {
+  border-color: #343b41;
+  background: #111519;
+  color: #626e76;
+}
+
+.adminMeta {
+  margin-top: 12px;
+  color: #53616a;
+  font-size: 6px;
+}
+
+.adminActions {
   margin-top: 13px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.adminActions button {
+  width: 100%;
+}
+
+.adminToggleButton {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid #62531d;
+  background: #292107;
+  color: #e5c655;
 }
 
 /* MESSAGES */
@@ -1166,6 +1427,10 @@ nav {
   height: 6px;
 }
 
+::-webkit-scrollbar-track {
+  background: #05080a;
+}
+
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
   background: #263139;
@@ -1180,11 +1445,12 @@ nav {
   }
 
   .lookupGrid,
-  .adminGrid {
+  .permissionGrid {
     grid-template-columns: repeat(3, 1fr);
   }
 
-  .vehicleGrid {
+  .vehicleGrid,
+  .adminGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -1199,7 +1465,8 @@ nav {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .formGrid {
+  .formGrid,
+  .adminFormGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -1241,7 +1508,9 @@ nav {
   .lookupGrid,
   .vehicleGrid,
   .formGrid,
-  .adminGrid {
+  .adminGrid,
+  .adminFormGrid,
+  .permissionGrid {
     grid-template-columns: 1fr;
   }
 
@@ -1256,5 +1525,14 @@ nav {
   .tableHead,
   .tableRow {
     min-width: 750px;
+  }
+
+  .permissionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .adminActions {
+    grid-template-columns: 1fr;
   }
 }
