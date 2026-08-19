@@ -165,6 +165,36 @@ type ServerConfig = {
   updatedBy: string;
 };
 
+type LookupUser = {
+  userId: number;
+  username: string;
+  displayName: string;
+  description: string;
+  created: string | null;
+  isBanned: boolean;
+};
+
+type LookupApiResponse = {
+  success: boolean;
+  found?: boolean;
+  message?: string;
+
+  user?: LookupUser;
+
+  online?: boolean;
+  live?: RobloxPlayer | null;
+
+  moderation?: {
+    banned: boolean;
+    ban: BanRecord | null;
+  };
+
+  admin?: {
+    isAdmin: boolean;
+    record: AdminRecord | null;
+  };
+};
+
 const pages = [
   "Dashboard",
   "Configuration",
@@ -274,6 +304,23 @@ export default function Home() {
 
   const [lookupQuery, setLookupQuery] =
     useState("");
+
+  const [
+    lookupResult,
+    setLookupResult,
+  ] = useState<LookupApiResponse | null>(
+    null
+  );
+
+  const [
+    lookupLoading,
+    setLookupLoading,
+  ] = useState(false);
+
+  const [
+    lookupError,
+    setLookupError,
+  ] = useState("");
 
   const [bans, setBans] = useState<
     BanRecord[]
@@ -610,27 +657,100 @@ export default function Home() {
       );
     }, [players, search]);
 
-  const lookupResults =
-    useMemo(() => {
-      const q = lookupQuery
-        .trim()
-        .toLowerCase();
+  /* ======================================================
+     LOOKUP
+     ====================================================== */
 
-      if (!q) {
-        return [];
+  async function searchLookup() {
+    const query = lookupQuery.trim();
+
+    if (!query) {
+      setLookupResult(null);
+      setLookupError(
+        "Enter a Roblox username or User ID."
+      );
+      return;
+    }
+
+    setLookupLoading(true);
+    setLookupError("");
+
+    try {
+      const response = await fetch(
+        `/api/roblox/lookup?q=${encodeURIComponent(
+          query
+        )}`,
+        {
+          cache: "no-store",
+        }
+      );
+
+      const data: LookupApiResponse =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !data.success ||
+        !data.found
+      ) {
+        setLookupResult(null);
+        setLookupError(
+          data.message ||
+            "Roblox user not found."
+        );
+        return;
       }
 
-      return players.filter(
-        (player) =>
-          player.username
-            .toLowerCase()
-            .includes(q) ||
-          player.displayName
-            .toLowerCase()
-            .includes(q) ||
-          String(player.userId).includes(q)
+      setLookupResult(data);
+    } catch (error) {
+      console.error(
+        "[SantionV Lookup]",
+        error
       );
-    }, [players, lookupQuery]);
+
+      setLookupResult(null);
+      setLookupError(
+        "Lookup request failed."
+      );
+    } finally {
+      setLookupLoading(false);
+    }
+  }
+
+  function openLookupPlayerInMonitor() {
+    const live =
+      lookupResult?.live ?? null;
+
+    if (!live) {
+      return;
+    }
+
+    setSelectedPlayer(live);
+    setActivePage("Live Monitor");
+  }
+
+  function prepareLookupBan() {
+    const user =
+      lookupResult?.user;
+
+    if (!user) {
+      return;
+    }
+
+    setBanUserId(
+      String(user.userId)
+    );
+
+    setBanUsername(
+      user.username
+    );
+
+    setBanReason("");
+    setBanDuration("60");
+    setBanPermanent(false);
+
+    setActivePage("Bans");
+  }
 
   /* ======================================================
      ADMIN COMMANDS
@@ -2276,80 +2396,568 @@ export default function Home() {
      ====================================================== */
 
   function renderLookup() {
+    const user =
+      lookupResult?.user;
+
+    const live =
+      lookupResult?.live ?? null;
+
+    const ban =
+      lookupResult?.moderation?.ban ??
+      null;
+
+    const admin =
+      lookupResult?.admin?.record ??
+      null;
+
     return (
       <div className="modulePage">
         <div className="largePanel">
           <div className="panelHeading">
-            <h2>
-              Player Lookup
-            </h2>
+            <div>
+              <h2>
+                Player Lookup
+              </h2>
 
-            <input
-              className="normalInput"
-              placeholder="Username / User ID"
-              value={
-                lookupQuery
-              }
-              onChange={(
-                event
-              ) =>
-                setLookupQuery(
-                  event.target.value
-                )
-              }
-            />
+              <p>
+                Search any Roblox account
+                by username or User ID.
+              </p>
+            </div>
+
+            <div className="inlineButtons">
+              <input
+                className="normalInput"
+                placeholder="Username / User ID"
+                value={
+                  lookupQuery
+                }
+                onChange={(
+                  event
+                ) =>
+                  setLookupQuery(
+                    event.target.value
+                  )
+                }
+                onKeyDown={(
+                  event
+                ) => {
+                  if (
+                    event.key === "Enter"
+                  ) {
+                    searchLookup();
+                  }
+                }}
+              />
+
+              <button
+                className="smallButton"
+                disabled={
+                  lookupLoading
+                }
+                onClick={
+                  searchLookup
+                }
+              >
+                {lookupLoading
+                  ? "SEARCHING..."
+                  : "SEARCH"}
+              </button>
+            </div>
           </div>
 
-          <div className="lookupGrid">
-            {lookupResults.map(
-              (player) => (
-                <div
-                  className="lookupCard"
-                  key={
-                    player.userId
-                  }
-                >
-                  <h3>
-                    {
-                      player.username
-                    }
-                  </h3>
+          {lookupError && (
+            <div className="panelMessage redText">
+              {lookupError}
+            </div>
+          )}
 
-                  <p>
-                    User ID:{" "}
-                    {
-                      player.userId
-                    }
-                  </p>
+          {!lookupError &&
+            !lookupResult && (
+              <div className="panelMessage">
+                Search a Roblox username
+                or User ID.
+              </div>
+            )}
 
-                  <p>
-                    HP:{" "}
-                    {
-                      player.health
-                    }
-                  </p>
+          {user && lookupResult && (
+            <>
+              <div className="statsGrid">
+                <div className="statCard">
+                  <span>
+                    ROBLOX USER
+                  </span>
 
-                  <p>
-                    Team:{" "}
-                    {
-                      player.team
-                    }
-                  </p>
+                  <strong>
+                    {user.username}
+                  </strong>
 
-                  <button
-                    className="smallButton"
-                    onClick={() =>
-                      watchPlayer(
-                        player
-                      )
+                  <small>
+                    {user.displayName}
+                  </small>
+                </div>
+
+                <div className="statCard">
+                  <span>
+                    USER ID
+                  </span>
+
+                  <strong>
+                    {user.userId}
+                  </strong>
+
+                  <small>
+                    Permanent Roblox ID
+                  </small>
+                </div>
+
+                <div className="statCard">
+                  <span>
+                    SERVER STATUS
+                  </span>
+
+                  <strong
+                    className={
+                      lookupResult.online
+                        ? "greenText"
+                        : "redText"
                     }
                   >
-                    WATCH
-                  </button>
+                    {lookupResult.online
+                      ? "ONLINE"
+                      : "OFFLINE"}
+                  </strong>
+
+                  <small>
+                    SantionV server
+                  </small>
                 </div>
-              )
-            )}
-          </div>
+
+                <div className="statCard">
+                  <span>
+                    MODERATION
+                  </span>
+
+                  <strong
+                    className={
+                      lookupResult
+                        .moderation
+                        ?.banned
+                        ? "redText"
+                        : "greenText"
+                    }
+                  >
+                    {lookupResult
+                      .moderation
+                      ?.banned
+                      ? "BANNED"
+                      : "CLEAR"}
+                  </strong>
+
+                  <small>
+                    SantionV ban status
+                  </small>
+                </div>
+              </div>
+
+              <div className="largePanel">
+                <div className="panelHeading">
+                  <div>
+                    <h2>
+                      Roblox Profile
+                    </h2>
+
+                    <p>
+                      Account information
+                      returned by Roblox.
+                    </p>
+                  </div>
+
+                  <div className="inlineButtons">
+                    {live && (
+                      <button
+                        className="smallButton"
+                        onClick={
+                          openLookupPlayerInMonitor
+                        }
+                      >
+                        WATCH LIVE
+                      </button>
+                    )}
+
+                    {!lookupResult
+                      .moderation
+                      ?.banned && (
+                      <button
+                        className="dangerButton"
+                        onClick={
+                          prepareLookupBan
+                        }
+                      >
+                        PREPARE BAN
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="serverDetails">
+                  <div>
+                    <span>
+                      USERNAME
+                    </span>
+
+                    <strong>
+                      {user.username}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      DISPLAY NAME
+                    </span>
+
+                    <strong>
+                      {user.displayName}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      USER ID
+                    </span>
+
+                    <strong>
+                      {user.userId}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      CREATED
+                    </span>
+
+                    <strong>
+                      {user.created
+                        ? new Date(
+                            user.created
+                          ).toLocaleString(
+                            "tr-TR"
+                          )
+                        : "-"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      ROBLOX BAN
+                    </span>
+
+                    <strong
+                      className={
+                        user.isBanned
+                          ? "redText"
+                          : "greenText"
+                      }
+                    >
+                      {user.isBanned
+                        ? "BANNED"
+                        : "NOT BANNED"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      ADMIN STATUS
+                    </span>
+
+                    <strong
+                      className={
+                        lookupResult
+                          .admin
+                          ?.isAdmin
+                          ? "greenText"
+                          : ""
+                      }
+                    >
+                      {lookupResult
+                        .admin
+                        ?.isAdmin
+                        ? admin?.role ??
+                          "ADMIN"
+                        : "NOT ADMIN"}
+                    </strong>
+                  </div>
+                </div>
+
+                {user.description && (
+                  <div className="positionPanel">
+                    <div className="positionTitle">
+                      DESCRIPTION
+                    </div>
+
+                    <p>
+                      {user.description}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {live && (
+                <div className="largePanel">
+                  <div className="panelHeading">
+                    <div>
+                      <h2>
+                        Live Player Data
+                      </h2>
+
+                      <p>
+                        Real-time data from
+                        the active Roblox
+                        server.
+                      </p>
+                    </div>
+
+                    <button
+                      className="smallButton"
+                      onClick={
+                        openLookupPlayerInMonitor
+                      }
+                    >
+                      OPEN LIVE MONITOR
+                    </button>
+                  </div>
+
+                  <div className="liveStatsGrid">
+                    <div>
+                      <span>
+                        HEALTH
+                      </span>
+
+                      <strong>
+                        {live.health}/
+                        {live.maxHealth}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        STATE
+                      </span>
+
+                      <strong>
+                        {live.humanoidState}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        TEAM
+                      </span>
+
+                      <strong>
+                        {live.team}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        DEPARTMENT
+                      </span>
+
+                      <strong>
+                        {live.department}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        VEHICLE
+                      </span>
+
+                      <strong>
+                        {live.inVehicle
+                          ? live.vehicleName ??
+                            "Vehicle"
+                          : "On Foot"}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        ACCOUNT AGE
+                      </span>
+
+                      <strong>
+                        {live.accountAge}d
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="positionPanel">
+                    <div className="positionTitle">
+                      LIVE POSITION
+                    </div>
+
+                    <div className="positionGrid">
+                      <div>
+                        <span>X</span>
+
+                        <strong>
+                          {formatPosition(
+                            live.position?.x
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Y</span>
+
+                        <strong>
+                          {formatPosition(
+                            live.position?.y
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Z</span>
+
+                        <strong>
+                          {formatPosition(
+                            live.position?.z
+                          )}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="largePanel">
+                <div className="panelHeading">
+                  <div>
+                    <h2>
+                      Moderation
+                    </h2>
+
+                    <p>
+                      Ban and admin status.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="serverDetails">
+                  <div>
+                    <span>
+                      SANTIONV BAN
+                    </span>
+
+                    <strong
+                      className={
+                        lookupResult
+                          .moderation
+                          ?.banned
+                          ? "redText"
+                          : "greenText"
+                      }
+                    >
+                      {lookupResult
+                        .moderation
+                        ?.banned
+                        ? "ACTIVE BAN"
+                        : "NO BAN"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      BAN REASON
+                    </span>
+
+                    <strong>
+                      {ban?.reason ??
+                        "-"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      BAN TYPE
+                    </span>
+
+                    <strong>
+                      {ban
+                        ? ban.permanent
+                          ? "Permanent"
+                          : "Temporary"
+                        : "-"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      ADMIN
+                    </span>
+
+                    <strong>
+                      {lookupResult
+                        .admin
+                        ?.isAdmin
+                        ? "YES"
+                        : "NO"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      ADMIN ROLE
+                    </span>
+
+                    <strong>
+                      {admin?.role ??
+                        "-"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      ADMIN LEVEL
+                    </span>
+
+                    <strong>
+                      {admin?.level ??
+                        "-"}
+                    </strong>
+                  </div>
+                </div>
+
+                {admin && (
+                  <div className="adminPermissionList">
+                    {admin.permissions
+                      .length > 0 ? (
+                      admin.permissions.map(
+                        (
+                          permission
+                        ) => (
+                          <span
+                            key={
+                              permission
+                            }
+                          >
+                            {permission}
+                          </span>
+                        )
+                      )
+                    ) : (
+                      <span className="noPermission">
+                        No permissions
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
