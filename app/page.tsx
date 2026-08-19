@@ -365,6 +365,15 @@ export default function Home() {
   const [kickReason, setKickReason] =
     useState("");
 
+  const [logSearch, setLogSearch] =
+    useState("");
+
+  const [logLevelFilter, setLogLevelFilter] =
+    useState("all");
+
+  const [logUserIdFilter, setLogUserIdFilter] =
+    useState("");
+
   /* ======================================================
      LOAD PLAYERS
      ====================================================== */
@@ -1994,6 +2003,43 @@ export default function Home() {
      ====================================================== */
 
   function renderConsole() {
+    const filteredLogs = logs.filter((log) => {
+      const query = logSearch
+        .trim()
+        .toLowerCase();
+
+      const matchesSearch =
+        !query ||
+        log.message
+          .toLowerCase()
+          .includes(query) ||
+        String(log.username ?? "")
+          .toLowerCase()
+          .includes(query) ||
+        String(log.action ?? "")
+          .toLowerCase()
+          .includes(query) ||
+        String(log.source ?? "")
+          .toLowerCase()
+          .includes(query);
+
+      const matchesLevel =
+        logLevelFilter === "all" ||
+        log.level === logLevelFilter;
+
+      const matchesUserId =
+        !logUserIdFilter.trim() ||
+        String(log.userId ?? "").includes(
+          logUserIdFilter.trim()
+        );
+
+      return (
+        matchesSearch &&
+        matchesLevel &&
+        matchesUserId
+      );
+    });
+
     return (
       <div className="modulePage">
         <div className="largePanel">
@@ -2004,8 +2050,8 @@ export default function Home() {
               </h2>
 
               <p>
-                Persistent
-                server logs.
+                Persistent Roblox server logs
+                and admin activity.
               </p>
             </div>
 
@@ -2030,33 +2076,191 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="consoleFilters">
+            <input
+              placeholder="Search message / username / action / source..."
+              value={
+                logSearch
+              }
+              onChange={(
+                event
+              ) =>
+                setLogSearch(
+                  event.target.value
+                )
+              }
+            />
+
+            <select
+              value={
+                logLevelFilter
+              }
+              onChange={(
+                event
+              ) =>
+                setLogLevelFilter(
+                  event.target.value
+                )
+              }
+            >
+              <option value="all">
+                All Levels
+              </option>
+
+              <option value="info">
+                Info
+              </option>
+
+              <option value="success">
+                Success
+              </option>
+
+              <option value="warning">
+                Warning
+              </option>
+
+              <option value="error">
+                Error
+              </option>
+
+              <option value="admin">
+                Admin
+              </option>
+
+              <option value="vehicle">
+                Vehicle
+              </option>
+
+              <option value="ban">
+                Ban
+              </option>
+
+              <option value="player">
+                Player
+              </option>
+            </select>
+
+            <input
+              placeholder="User ID filter..."
+              value={
+                logUserIdFilter
+              }
+              onChange={(
+                event
+              ) =>
+                setLogUserIdFilter(
+                  event.target.value
+                )
+              }
+            />
+
+            <button
+              className="smallButton"
+              onClick={() => {
+                setLogSearch("");
+                setLogLevelFilter("all");
+                setLogUserIdFilter("");
+              }}
+            >
+              RESET FILTERS
+            </button>
+          </div>
+
+          <div className="consoleStats">
+            <span>
+              Loaded:{" "}
+              <b>
+                {logs.length}
+              </b>
+            </span>
+
+            <span>
+              Showing:{" "}
+              <b>
+                {filteredLogs.length}
+              </b>
+            </span>
+          </div>
+
           <div className="consoleBox">
-            {logs.length === 0 ? (
+            {filteredLogs.length === 0 ? (
               <div className="panelMessage">
-                No logs.
+                No matching logs.
               </div>
             ) : (
-              logs.map(
+              filteredLogs.map(
                 (log) => (
                   <div
-                    className={`consoleLine ${log.level}`}
+                    className={`consoleLogCard ${log.level}`}
                     key={log.id}
                   >
-                    <span>
-                      {new Date(
-                        log.createdAt
-                      ).toLocaleTimeString()}
-                    </span>
+                    <div className="consoleLogTop">
+                      <div>
+                        <span
+                          className={`consoleLevelBadge ${log.level}`}
+                        >
+                          {log.level.toUpperCase()}
+                        </span>
 
-                    <strong>
-                      {log.level}
-                    </strong>
+                        <strong>
+                          {log.message}
+                        </strong>
+                      </div>
 
-                    <p>
-                      {
-                        log.message
-                      }
-                    </p>
+                      <time>
+                        {new Date(
+                          log.createdAt
+                        ).toLocaleString(
+                          "tr-TR"
+                        )}
+                      </time>
+                    </div>
+
+                    <div className="consoleLogMeta">
+                      <div>
+                        <span>
+                          PLAYER
+                        </span>
+
+                        <strong>
+                          {log.username ??
+                            "-"}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          USER ID
+                        </span>
+
+                        <strong>
+                          {log.userId ??
+                            "-"}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          ACTION
+                        </span>
+
+                        <strong>
+                          {log.action ??
+                            "-"}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          SOURCE
+                        </span>
+
+                        <strong>
+                          {log.source ??
+                            "-"}
+                        </strong>
+                      </div>
+                    </div>
                   </div>
                 )
               )
