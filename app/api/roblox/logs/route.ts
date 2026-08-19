@@ -15,6 +15,7 @@ type LogLevel =
 type LogRecord = {
   id: string;
   level: LogLevel;
+
   message: string;
 
   userId?: number | null;
@@ -41,37 +42,103 @@ type LogRequest = {
   metadata?: Record<string, unknown>;
 };
 
-const LOG_LIST_KEY = "santionv:logs";
+const LOG_KEY = "santionv:logs";
 const MAX_LOGS = 500;
+
+const allowedLevels: LogLevel[] = [
+  "info",
+  "success",
+  "warning",
+  "error",
+  "admin",
+  "vehicle",
+  "ban",
+  "player",
+];
+
+/* =========================================================
+   GET
+   /api/roblox/logs
+   /api/roblox/logs?limit=100
+   /api/roblox/logs?level=admin
+   /api/roblox/logs?userId=123
+   ========================================================= */
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
 
-    const limitParam = Number(
+    const limitRaw = Number(
       url.searchParams.get("limit") ?? 100
     );
 
     const limit = Math.max(
       1,
       Math.min(
-        Number.isFinite(limitParam)
-          ? limitParam
+        Number.isFinite(limitRaw)
+          ? Math.floor(limitRaw)
           : 100,
-        500
+        MAX_LOGS
       )
     );
 
+    const levelFilter =
+      url.searchParams.get("level");
+
+    const userIdRaw =
+      url.searchParams.get("userId");
+
+    const userIdFilter =
+      userIdRaw !== null
+        ? Number(userIdRaw)
+        : null;
+
     const logs =
       await redis.lrange<LogRecord>(
-        LOG_LIST_KEY,
+        LOG_KEY,
         0,
-        limit - 1
+        MAX_LOGS - 1
       );
+
+    let filtered = Array.isArray(logs)
+      ? logs
+      : [];
+
+    if (
+      levelFilter &&
+      allowedLevels.includes(
+        levelFilter as LogLevel
+      )
+    ) {
+      filtered = filtered.filter(
+        (log) =>
+          log.level === levelFilter
+      );
+    }
+
+    if (
+      userIdFilter !== null &&
+      Number.isFinite(userIdFilter)
+    ) {
+      filtered = filtered.filter(
+        (log) =>
+          Number(log.userId) ===
+          userIdFilter
+      );
+    }
+
+    filtered = filtered
+      .sort(
+        (a, b) =>
+          Number(b.createdAt) -
+          Number(a.createdAt)
+      )
+      .slice(0, limit);
 
     return Response.json({
       success: true,
-      logs,
+      logs: filtered,
+      count: filtered.length,
     });
   } catch (error) {
     console.error(
@@ -82,8 +149,9 @@ export async function GET(request: Request) {
     return Response.json(
       {
         success: false,
-        message: "Logs could not be loaded",
         logs: [],
+        message:
+          "Logs could not be loaded",
       },
       {
         status: 500,
@@ -92,6 +160,11 @@ export async function GET(request: Request) {
   }
 }
 
+/* =========================================================
+   POST
+   Roblox / WebPanelService buraya log gönderir
+   ========================================================= */
+
 export async function POST(
   request: Request
 ) {
@@ -99,25 +172,17 @@ export async function POST(
     const body =
       (await request.json()) as LogRequest;
 
-    const allowedLevels: LogLevel[] = [
-      "info",
-      "success",
-      "warning",
-      "error",
-      "admin",
-      "vehicle",
-      "ban",
-      "player",
-    ];
-
-    const level =
+    const level: LogLevel =
       body.level &&
-      allowedLevels.includes(body.level)
+      allowedLevels.includes(
+        body.level
+      )
         ? body.level
         : "info";
 
     const message =
-      typeof body.message === "string"
+      typeof body.message ===
+        "string"
         ? body.message.trim()
         : "";
 
@@ -134,36 +199,59 @@ export async function POST(
       );
     }
 
+    const userIdValue =
+      body.userId !== undefined &&
+      body.userId !== null
+        ? Number(body.userId)
+        : null;
+
     const log: LogRecord = {
       id: crypto.randomUUID(),
 
       level,
 
-      message,
+      message: message.slice(
+        0,
+        2000
+      ),
 
       userId:
-        body.userId !== undefined
-          ? Number(body.userId)
+        userIdValue !== null &&
+        Number.isFinite(userIdValue)
+          ? userIdValue
           : null,
 
       username:
-        typeof body.username === "string"
+        typeof body.username ===
+          "string"
           ? body.username
+              .trim()
+              .slice(0, 100)
           : null,
 
       action:
-        typeof body.action === "string"
+        typeof body.action ===
+          "string"
           ? body.action
+              .trim()
+              .slice(0, 100)
           : null,
 
       source:
-        typeof body.source === "string"
+        typeof body.source ===
+          "string"
           ? body.source
+              .trim()
+              .slice(0, 100)
           : null,
 
       metadata:
         body.metadata &&
-        typeof body.metadata === "object"
+        typeof body.metadata ===
+          "object" &&
+        !Array.isArray(
+          body.metadata
+        )
           ? body.metadata
           : undefined,
 
@@ -171,12 +259,12 @@ export async function POST(
     };
 
     await redis.lpush(
-      LOG_LIST_KEY,
+      LOG_KEY,
       log
     );
 
     await redis.ltrim(
-      LOG_LIST_KEY,
+      LOG_KEY,
       0,
       MAX_LOGS - 1
     );
@@ -195,7 +283,8 @@ export async function POST(
     return Response.json(
       {
         success: false,
-        message: "Log could not be stored",
+        message:
+          "Log could not be stored",
       },
       {
         status: 500,
@@ -204,13 +293,19 @@ export async function POST(
   }
 }
 
+/* =========================================================
+   DELETE
+   /api/roblox/logs
+   Tüm logları temizler
+   ========================================================= */
+
 export async function DELETE() {
   try {
-    await redis.del(LOG_LIST_KEY);
+    await redis.del(LOG_KEY);
 
     return Response.json({
       success: true,
-      message: "Logs cleared",
+      message: "All logs cleared",
     });
   } catch (error) {
     console.error(
@@ -221,7 +316,8 @@ export async function DELETE() {
     return Response.json(
       {
         success: false,
-        message: "Logs could not be cleared",
+        message:
+          "Logs could not be cleared",
       },
       {
         status: 500,
