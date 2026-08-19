@@ -641,7 +641,10 @@ nav {
   overflow: auto;
   background-color: #05080a;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    ),
     linear-gradient(
       90deg,
       rgba(255, 255, 255, 0.018) 1px,
@@ -906,7 +909,10 @@ nav {
   border-radius: 8px;
   background-color: #05090b;
   background-image:
-    linear-gradient(rgba(0, 230, 118, 0.04) 1px, transparent 1px),
+    linear-gradient(
+      rgba(0, 230, 118, 0.04) 1px,
+      transparent 1px
+    ),
     linear-gradient(
       90deg,
       rgba(0, 230, 118, 0.04) 1px,
@@ -935,6 +941,43 @@ nav {
   gap: 7px;
 }
 
+.consoleFilters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.consoleFilters input,
+.consoleFilters select {
+  width: 100%;
+  height: 34px;
+  padding: 0 11px;
+  outline: none;
+  border: 1px solid #26323b;
+  border-radius: 5px;
+  background: #090e12;
+  color: #dfe6ea;
+  font-size: 8px;
+}
+
+.consoleFilters input:focus,
+.consoleFilters select:focus {
+  border-color: #0c7943;
+}
+
+.consoleStats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+  color: #65737d;
+  font-size: 7px;
+}
+
+.consoleStats b {
+  color: #00e676;
+}
+
 .consoleBox {
   min-height: 420px;
   max-height: 600px;
@@ -942,8 +985,120 @@ nav {
   border: 1px solid #1e2930;
   border-radius: 6px;
   background: #040709;
-  font-family: Consolas, monospace;
 }
+
+.consoleLogCard {
+  padding: 12px;
+  border-bottom: 1px solid #10171c;
+  background: #05080a;
+}
+
+.consoleLogCard:hover {
+  background: #080d11;
+}
+
+.consoleLogTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.consoleLogTop > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.consoleLogTop strong {
+  color: #dfe6ea;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.consoleLogTop time {
+  color: #53616a;
+  font-size: 7px;
+  white-space: nowrap;
+}
+
+.consoleLevelBadge {
+  min-width: 56px;
+  padding: 5px 7px;
+  border: 1px solid #29343c;
+  border-radius: 4px;
+  background: #0d1216;
+  color: #8c9aa3;
+  font-size: 6px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.consoleLevelBadge.info {
+  border-color: #275783;
+  color: #63a9ff;
+}
+
+.consoleLevelBadge.success {
+  border-color: #14643c;
+  color: #00e676;
+}
+
+.consoleLevelBadge.warning {
+  border-color: #6d591a;
+  color: #ffd740;
+}
+
+.consoleLevelBadge.error,
+.consoleLevelBadge.ban {
+  border-color: #753131;
+  color: #ff6262;
+}
+
+.consoleLevelBadge.admin {
+  border-color: #623b79;
+  color: #c97cff;
+}
+
+.consoleLevelBadge.vehicle {
+  border-color: #29667a;
+  color: #66d7ff;
+}
+
+.consoleLevelBadge.player {
+  border-color: #14643c;
+  color: #00e676;
+}
+
+.consoleLogMeta {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.consoleLogMeta > div {
+  padding: 7px;
+  border: 1px solid #182127;
+  border-radius: 4px;
+  background: #080c0f;
+}
+
+.consoleLogMeta span {
+  display: block;
+  color: #53616b;
+  font-size: 6px;
+}
+
+.consoleLogMeta strong {
+  display: block;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  color: #aeb9bf;
+  font-size: 7px;
+}
+
+/* OLD CONSOLE SUPPORT */
 
 .consoleLine {
   min-height: 34px;
@@ -1469,6 +1624,14 @@ nav {
   .adminFormGrid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .consoleFilters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .consoleLogMeta {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 800px) {
@@ -1510,7 +1673,9 @@ nav {
   .formGrid,
   .adminGrid,
   .adminFormGrid,
-  .permissionGrid {
+  .permissionGrid,
+  .consoleFilters,
+  .consoleLogMeta {
     grid-template-columns: 1fr;
   }
 
@@ -1534,5 +1699,9 @@ nav {
 
   .adminActions {
     grid-template-columns: 1fr;
+  }
+
+  .consoleLogTop {
+    flex-direction: column;
   }
 }
