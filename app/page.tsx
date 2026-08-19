@@ -426,6 +426,21 @@ export default function Home() {
   const [logUserIdFilter, setLogUserIdFilter] =
     useState("");
 
+  const [
+    liveLogsEnabled,
+    setLiveLogsEnabled,
+  ] = useState(true);
+
+  const [
+    newLogCount,
+    setNewLogCount,
+  ] = useState(0);
+
+  const [
+    lastLogRefresh,
+    setLastLogRefresh,
+  ] = useState<number | null>(null);
+
   /* ======================================================
      LOAD PLAYERS
      ====================================================== */
@@ -568,7 +583,9 @@ export default function Home() {
      LOAD LOGS
      ====================================================== */
 
-  async function loadLogs() {
+  async function loadLogs(
+    countNew = false
+  ) {
     try {
       const response = await fetch(
         "/api/roblox/logs?limit=100",
@@ -579,10 +596,43 @@ export default function Home() {
 
       const data = await response.json();
 
-      setLogs(
+      const nextLogs: LogRecord[] =
         Array.isArray(data.logs)
           ? data.logs
-          : []
+          : [];
+
+      setLogs((currentLogs) => {
+        if (
+          countNew &&
+          currentLogs.length > 0 &&
+          nextLogs.length > 0
+        ) {
+          const knownIds =
+            new Set(
+              currentLogs.map(
+                (log) => log.id
+              )
+            );
+
+          const incoming =
+            nextLogs.filter(
+              (log) =>
+                !knownIds.has(log.id)
+            ).length;
+
+          if (incoming > 0) {
+            setNewLogCount(
+              (current) =>
+                current + incoming
+            );
+          }
+        }
+
+        return nextLogs;
+      });
+
+      setLastLogRefresh(
+        Date.now()
       );
     } catch {
       setLogs([]);
@@ -635,6 +685,27 @@ export default function Home() {
       window.clearInterval(interval);
     };
   }, []);
+
+  useEffect(() => {
+    if (!liveLogsEnabled) {
+      return;
+    }
+
+    const interval =
+      window.setInterval(() => {
+        loadLogs(true);
+      }, 3000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [liveLogsEnabled]);
+
+  useEffect(() => {
+    if (activePage === "Console") {
+      setNewLogCount(0);
+    }
+  }, [activePage, logs]);
 
   /* ======================================================
      FILTERS
@@ -2462,42 +2533,48 @@ export default function Home() {
      ====================================================== */
 
   function renderConsole() {
-    const filteredLogs = logs.filter((log) => {
-      const query = logSearch
-        .trim()
-        .toLowerCase();
+    const filteredLogs = logs
+      .filter((log) => {
+        const query = logSearch
+          .trim()
+          .toLowerCase();
 
-      const matchesSearch =
-        !query ||
-        log.message
-          .toLowerCase()
-          .includes(query) ||
-        String(log.username ?? "")
-          .toLowerCase()
-          .includes(query) ||
-        String(log.action ?? "")
-          .toLowerCase()
-          .includes(query) ||
-        String(log.source ?? "")
-          .toLowerCase()
-          .includes(query);
+        const matchesSearch =
+          !query ||
+          log.message
+            .toLowerCase()
+            .includes(query) ||
+          String(log.username ?? "")
+            .toLowerCase()
+            .includes(query) ||
+          String(log.action ?? "")
+            .toLowerCase()
+            .includes(query) ||
+          String(log.source ?? "")
+            .toLowerCase()
+            .includes(query);
 
-      const matchesLevel =
-        logLevelFilter === "all" ||
-        log.level === logLevelFilter;
+        const matchesLevel =
+          logLevelFilter === "all" ||
+          log.level === logLevelFilter;
 
-      const matchesUserId =
-        !logUserIdFilter.trim() ||
-        String(log.userId ?? "").includes(
-          logUserIdFilter.trim()
+        const matchesUserId =
+          !logUserIdFilter.trim() ||
+          String(log.userId ?? "").includes(
+            logUserIdFilter.trim()
+          );
+
+        return (
+          matchesSearch &&
+          matchesLevel &&
+          matchesUserId
         );
-
-      return (
-        matchesSearch &&
-        matchesLevel &&
-        matchesUserId
+      })
+      .sort(
+        (a, b) =>
+          Number(b.createdAt) -
+          Number(a.createdAt)
       );
-    });
 
     return (
       <div className="modulePage">
@@ -2516,10 +2593,29 @@ export default function Home() {
 
             <div className="inlineButtons">
               <button
-                className="smallButton"
-                onClick={
-                  loadLogs
+                className={
+                  liveLogsEnabled
+                    ? "smallButton liveLogsButton liveLogsButtonActive"
+                    : "smallButton liveLogsButton"
                 }
+                onClick={() =>
+                  setLiveLogsEnabled(
+                    (current) =>
+                      !current
+                  )
+                }
+              >
+                {liveLogsEnabled
+                  ? "LIVE LOGS: ON"
+                  : "LIVE LOGS: OFF"}
+              </button>
+
+              <button
+                className="smallButton"
+                onClick={() => {
+                  setNewLogCount(0);
+                  loadLogs();
+                }}
               >
                 REFRESH
               </button>
@@ -2532,6 +2628,50 @@ export default function Home() {
               >
                 CLEAR
               </button>
+            </div>
+          </div>
+
+          <div className="consoleLiveStatus">
+            <div>
+              <span
+                className={
+                  liveLogsEnabled
+                    ? "consoleLiveDot"
+                    : "consoleLiveDot consoleLiveDotOff"
+                }
+              />
+
+              <strong>
+                {liveLogsEnabled
+                  ? "LIVE"
+                  : "PAUSED"}
+              </strong>
+
+              <span>
+                Auto refresh every 3s
+              </span>
+            </div>
+
+            <div>
+              <span>
+                New logs:{" "}
+                <b>
+                  {newLogCount}
+                </b>
+              </span>
+
+              <span>
+                Last refresh:{" "}
+                <b>
+                  {lastLogRefresh
+                    ? new Date(
+                        lastLogRefresh
+                      ).toLocaleTimeString(
+                        "tr-TR"
+                      )
+                    : "-"}
+                </b>
+              </span>
             </div>
           </div>
 
@@ -2586,16 +2726,16 @@ export default function Home() {
                 Admin
               </option>
 
+              <option value="player">
+                Player
+              </option>
+
               <option value="vehicle">
                 Vehicle
               </option>
 
               <option value="ban">
                 Ban
-              </option>
-
-              <option value="player">
-                Player
               </option>
             </select>
 
