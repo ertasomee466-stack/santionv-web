@@ -322,6 +322,11 @@ export default function Home() {
     setLookupError,
   ] = useState("");
 
+  const [
+    selectedMapPlayer,
+    setSelectedMapPlayer,
+  ] = useState<RobloxPlayer | null>(null);
+
   const [bans, setBans] = useState<
     BanRecord[]
   >([]);
@@ -2066,53 +2071,387 @@ export default function Home() {
      ====================================================== */
 
   function renderInteractiveMap() {
+    const mapPlayers = players.filter(
+      (player) =>
+        player.position &&
+        Number.isFinite(
+          player.position.x
+        ) &&
+        Number.isFinite(
+          player.position.z
+        )
+    );
+
+    const xValues = mapPlayers.map(
+      (player) =>
+        player.position.x
+    );
+
+    const zValues = mapPlayers.map(
+      (player) =>
+        player.position.z
+    );
+
+    const minX =
+      xValues.length > 0
+        ? Math.min(...xValues)
+        : -100;
+
+    const maxX =
+      xValues.length > 0
+        ? Math.max(...xValues)
+        : 100;
+
+    const minZ =
+      zValues.length > 0
+        ? Math.min(...zValues)
+        : -100;
+
+    const maxZ =
+      zValues.length > 0
+        ? Math.max(...zValues)
+        : 100;
+
+    const xRange =
+      Math.max(
+        50,
+        maxX - minX
+      );
+
+    const zRange =
+      Math.max(
+        50,
+        maxZ - minZ
+      );
+
+    function mapLeft(
+      player: RobloxPlayer
+    ) {
+      return Math.max(
+        4,
+        Math.min(
+          96,
+          8 +
+            ((player.position.x -
+              minX) /
+              xRange) *
+              84
+        )
+      );
+    }
+
+    function mapTop(
+      player: RobloxPlayer
+    ) {
+      return Math.max(
+        4,
+        Math.min(
+          96,
+          8 +
+            ((player.position.z -
+              minZ) /
+              zRange) *
+              84
+        )
+      );
+    }
+
     return (
       <div className="modulePage">
-        <div className="largePanel">
-          <h2>
-            Interactive Map
-          </h2>
+        <div className="mapLayout">
+          <div className="largePanel mapMainPanel">
+            <div className="panelHeading">
+              <div>
+                <h2>
+                  Interactive Map
+                </h2>
 
-          <div className="mapBoard">
-            {players.map(
-              (player) => (
+                <p>
+                  Live player positions
+                  from the active Roblox
+                  server.
+                </p>
+              </div>
+
+              <div className="inlineButtons">
+                <span className="mapPlayerCount">
+                  {mapPlayers.length} LIVE
+                </span>
+
                 <button
-                  key={
-                    player.userId
+                  className="smallButton"
+                  onClick={
+                    loadPlayers
                   }
-                  className="mapPlayerDot"
-                  style={{
-                    left: `${
-                      50 +
-                      ((player
-                        .position?.x ??
-                        0) %
-                        400) /
-                        10
-                    }%`,
+                >
+                  REFRESH
+                </button>
+              </div>
+            </div>
 
-                    top: `${
-                      50 +
-                      ((player
-                        .position?.z ??
-                        0) %
-                        400) /
-                        10
-                    }%`,
-                  }}
+            <div className="mapBoard advancedMapBoard">
+              <div className="mapAxis mapAxisX">
+                X
+              </div>
+
+              <div className="mapAxis mapAxisZ">
+                Z
+              </div>
+
+              <div className="mapCrosshair mapCrosshairX" />
+              <div className="mapCrosshair mapCrosshairZ" />
+
+              {mapPlayers.length ===
+              0 ? (
+                <div className="mapEmptyState">
+                  No live player
+                  positions available.
+                </div>
+              ) : (
+                mapPlayers.map(
+                  (player) => {
+                    const selected =
+                      selectedMapPlayer
+                        ?.userId ===
+                      player.userId;
+
+                    return (
+                      <button
+                        key={
+                          player.userId
+                        }
+                        className={
+                          selected
+                            ? "mapPlayerDot mapPlayerDotSelected"
+                            : "mapPlayerDot"
+                        }
+                        style={{
+                          left: `${mapLeft(
+                            player
+                          )}%`,
+                          top: `${mapTop(
+                            player
+                          )}%`,
+                        }}
+                        title={`${player.username} | X ${formatPosition(
+                          player.position.x
+                        )} Z ${formatPosition(
+                          player.position.z
+                        )}`}
+                        onClick={() =>
+                          setSelectedMapPlayer(
+                            player
+                          )
+                        }
+                      >
+                        {player.username
+                          .charAt(0)
+                          .toUpperCase()}
+
+                        <span className="mapPlayerLabel">
+                          {
+                            player.username
+                          }
+                        </span>
+                      </button>
+                    );
+                  }
+                )
+              )}
+            </div>
+
+            <div className="mapLegend">
+              <span>
+                <i className="legendDot" />
+                Live player
+              </span>
+
+              <span>
+                Grid is scaled to
+                currently visible
+                players
+              </span>
+            </div>
+          </div>
+
+          <aside className="largePanel mapDetailsPanel">
+            {!selectedMapPlayer ? (
+              <div className="panelMessage">
+                Select a player dot
+                on the map.
+              </div>
+            ) : (
+              <>
+                <div className="mapSelectedHeader">
+                  <div className="selectedAvatar mapSelectedAvatar">
+                    {selectedMapPlayer
+                      .username
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+
+                  <div>
+                    <span>
+                      SELECTED PLAYER
+                    </span>
+
+                    <h2>
+                      {
+                        selectedMapPlayer
+                          .username
+                      }
+                    </h2>
+
+                    <p>
+                      {
+                        selectedMapPlayer
+                          .displayName
+                      }
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mapDetailGrid">
+                  <div>
+                    <span>
+                      USER ID
+                    </span>
+
+                    <strong>
+                      {
+                        selectedMapPlayer
+                          .userId
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      HEALTH
+                    </span>
+
+                    <strong>
+                      {
+                        selectedMapPlayer
+                          .health
+                      }
+                      /
+                      {
+                        selectedMapPlayer
+                          .maxHealth
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      STATE
+                    </span>
+
+                    <strong>
+                      {
+                        selectedMapPlayer
+                          .humanoidState
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      TEAM
+                    </span>
+
+                    <strong>
+                      {
+                        selectedMapPlayer
+                          .team
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      DEPARTMENT
+                    </span>
+
+                    <strong>
+                      {
+                        selectedMapPlayer
+                          .department
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      VEHICLE
+                    </span>
+
+                    <strong>
+                      {selectedMapPlayer
+                        .inVehicle
+                        ? selectedMapPlayer
+                            .vehicleName ??
+                          "Vehicle"
+                        : "On Foot"}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="positionPanel">
+                  <div className="positionTitle">
+                    LIVE POSITION
+                  </div>
+
+                  <div className="positionGrid">
+                    <div>
+                      <span>X</span>
+
+                      <strong>
+                        {formatPosition(
+                          selectedMapPlayer
+                            .position.x
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Y</span>
+
+                      <strong>
+                        {formatPosition(
+                          selectedMapPlayer
+                            .position.y
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Z</span>
+
+                      <strong>
+                        {formatPosition(
+                          selectedMapPlayer
+                            .position.z
+                        )}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  className="adminSaveButton mapWatchButton"
                   onClick={() =>
                     watchPlayer(
-                      player
+                      selectedMapPlayer
                     )
                   }
                 >
-                  {player.username
-                    .charAt(0)
-                    .toUpperCase()}
+                  WATCH IN LIVE MONITOR
                 </button>
-              )
+              </>
             )}
-          </div>
+          </aside>
         </div>
       </div>
     );
