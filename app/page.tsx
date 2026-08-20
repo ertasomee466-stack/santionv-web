@@ -1709,12 +1709,94 @@ export default function Home() {
      ====================================================== */
 
   function renderDashboard() {
+    const capacity =
+      server?.maxPlayers
+        ? Math.round(
+            ((server.playerCount ?? players.length) /
+              server.maxPlayers) *
+              100
+          )
+        : 0;
+
+    const activeVehicles =
+      vehicles.filter(
+        (vehicle) => vehicle.spawned
+      ).length;
+
+    const activeAdmins =
+      admins.filter(
+        (admin) => admin.active
+      ).length;
+
+    const recentLogs =
+      [...logs]
+        .sort(
+          (a, b) =>
+            b.createdAt - a.createdAt
+        )
+        .slice(0, 6);
+
+    const heartbeatAge =
+      server?.lastSeen
+        ? Math.max(
+            0,
+            Math.round(
+              (Date.now() -
+                server.lastSeen) /
+                1000
+            )
+          )
+        : null;
+
+    const healthyPlayers =
+      players.filter(
+        (player) =>
+          healthPercent(player) >= 70
+      ).length;
+
     return (
-      <div className="modulePage">
-        <div className="statsGrid">
-          <div className="statCard">
-            <span>
-              PLAYERS ONLINE
+      <div className="modulePage dashboardV2">
+        <section className="dashboardHero">
+          <div>
+            <span className="dashboardEyebrow">
+              SANTIONV / CONTROL CENTER
+            </span>
+
+            <h2>
+              Server Dashboard
+            </h2>
+
+            <p>
+              Live Roblox server status,
+              players, moderation and
+              activity in one place.
+            </p>
+          </div>
+
+          <div
+            className={
+              serverOnline
+                ? "dashboardLive online"
+                : "dashboardLive offline"
+            }
+          >
+            <span className="dashboardLiveDot" />
+
+            {serverOnline
+              ? "SERVER ONLINE"
+              : "SERVER OFFLINE"}
+          </div>
+        </section>
+
+        <div className="dashboardMetricGrid">
+          <button
+            className="dashboardMetricCard"
+            onClick={() =>
+              setActivePage("Players")
+            }
+          >
+            <span className="dashboardMetricLabel">
+              ONLINE PLAYERS
             </span>
 
             <strong>
@@ -1722,28 +1804,57 @@ export default function Home() {
             </strong>
 
             <small>
-              Live players
+              {server?.maxPlayers
+                ? `${capacity}% capacity`
+                : "Live player count"}
             </small>
-          </div>
 
-          <div className="statCard">
-            <span>
-              SERVER CAPACITY
+            <div className="dashboardProgress">
+              <span
+                style={{
+                  width: `${Math.min(
+                    100,
+                    capacity
+                  )}%`,
+                }}
+              />
+            </div>
+          </button>
+
+          <button
+            className="dashboardMetricCard"
+            onClick={() =>
+              setActivePage("Vehicles")
+            }
+          >
+            <span className="dashboardMetricLabel">
+              ACTIVE VEHICLES
             </span>
 
             <strong>
-              {server?.playerCount ?? 0}
-              /
-              {server?.maxPlayers ?? 0}
+              {activeVehicles}
             </strong>
 
             <small>
-              Current server
+              {vehicles.length} stored
+              vehicle
+              {vehicles.length === 1
+                ? ""
+                : "s"}
             </small>
-          </div>
 
-          <div className="statCard">
-            <span>
+            <span className="dashboardCardLink">
+              OPEN VEHICLES →
+            </span>
+          </button>
+
+          <button
+            className="dashboardMetricCard"
+            onClick={() =>
+              setActivePage("Bans")
+            }
+          >
+            <span className="dashboardMetricLabel">
               ACTIVE BANS
             </span>
 
@@ -1752,98 +1863,347 @@ export default function Home() {
             </strong>
 
             <small>
-              Ban records
+              Moderation records
             </small>
-          </div>
 
-          <div className="statCard">
-            <span>
-              ADMINS
+            <span className="dashboardCardLink">
+              OPEN BANS →
+            </span>
+          </button>
+
+          <button
+            className="dashboardMetricCard"
+            onClick={() =>
+              setActivePage("Admins")
+            }
+          >
+            <span className="dashboardMetricLabel">
+              ACTIVE ADMINS
             </span>
 
             <strong>
-              {admins.length}
+              {activeAdmins}
             </strong>
 
             <small>
-              Registered admins
+              {admins.length} registered
             </small>
-          </div>
+
+            <span className="dashboardCardLink">
+              MANAGE ADMINS →
+            </span>
+          </button>
         </div>
 
-        <div className="largePanel">
-          <h2>
-            Server Overview
-          </h2>
+        <div className="dashboardMainGrid">
+          <section className="dashboardPanel">
+            <div className="dashboardPanelHeader">
+              <div>
+                <span className="dashboardEyebrow">
+                  LIVE STATUS
+                </span>
 
-          <div className="serverDetails">
-            <div>
-              <span>STATUS</span>
+                <h3>
+                  Server Health
+                </h3>
+              </div>
 
-              <strong
-                className={
-                  serverOnline
-                    ? "greenText"
-                    : "redText"
+              <button
+                className="dashboardRefreshButton"
+                onClick={() => {
+                  void loadPlayers();
+                  void loadLogs();
+                  void loadVehicles();
+                  void loadBans();
+                  void loadAdmins();
+
+                  showToast(
+                    "Dashboard refreshed.",
+                    "success"
+                  );
+                }}
+              >
+                REFRESH
+              </button>
+            </div>
+
+            <div className="dashboardHealthGrid">
+              <div>
+                <span>STATUS</span>
+                <strong
+                  className={
+                    serverOnline
+                      ? "greenText"
+                      : "redText"
+                  }
+                >
+                  {serverOnline
+                    ? "ONLINE"
+                    : "OFFLINE"}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  HEARTBEAT AGE
+                </span>
+                <strong>
+                  {heartbeatAge === null
+                    ? "-"
+                    : `${heartbeatAge}s`}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  HEALTHY PLAYERS
+                </span>
+                <strong>
+                  {healthyPlayers}/
+                  {players.length}
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  CAPACITY
+                </span>
+                <strong>
+                  {server?.playerCount ??
+                    players.length}
+                  /
+                  {server?.maxPlayers ??
+                    "-"}
+                </strong>
+              </div>
+
+              <div>
+                <span>PLACE ID</span>
+                <strong>
+                  {server?.placeId ?? "-"}
+                </strong>
+              </div>
+
+              <div>
+                <span>GAME ID</span>
+                <strong>
+                  {server?.gameId ?? "-"}
+                </strong>
+              </div>
+            </div>
+
+            <div className="dashboardServerId">
+              <span>SERVER ID</span>
+              <code>
+                {server?.serverId ??
+                  "Waiting for Roblox heartbeat..."}
+              </code>
+            </div>
+          </section>
+
+          <section className="dashboardPanel">
+            <div className="dashboardPanelHeader">
+              <div>
+                <span className="dashboardEyebrow">
+                  QUICK CONTROL
+                </span>
+
+                <h3>
+                  Quick Actions
+                </h3>
+              </div>
+            </div>
+
+            <div className="dashboardQuickGrid">
+              <button
+                onClick={() =>
+                  setActivePage("Players")
                 }
               >
-                {serverOnline
-                  ? "ONLINE"
-                  : "OFFLINE"}
-              </strong>
+                <strong>Players</strong>
+                <span>
+                  View and manage online
+                  players
+                </span>
+              </button>
+
+              <button
+                onClick={() =>
+                  setActivePage(
+                    "Live Monitor"
+                  )
+                }
+              >
+                <strong>
+                  Live Monitor
+                </strong>
+                <span>
+                  Open real-time player
+                  monitor
+                </span>
+              </button>
+
+              <button
+                onClick={() =>
+                  setActivePage("Console")
+                }
+              >
+                <strong>Console</strong>
+                <span>
+                  Inspect live server logs
+                </span>
+              </button>
+
+              <button
+                onClick={() =>
+                  setActivePage(
+                    "Configuration"
+                  )
+                }
+              >
+                <strong>
+                  Configuration
+                </strong>
+                <span>
+                  Server lock and
+                  maintenance controls
+                </span>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <div className="dashboardBottomGrid">
+          <section className="dashboardPanel">
+            <div className="dashboardPanelHeader">
+              <div>
+                <span className="dashboardEyebrow">
+                  ACTIVITY
+                </span>
+
+                <h3>
+                  Recent Activity
+                </h3>
+              </div>
+
+              <button
+                className="dashboardTextButton"
+                onClick={() =>
+                  setActivePage("Console")
+                }
+              >
+                VIEW ALL
+              </button>
             </div>
 
-            <div>
-              <span>
-                PLACE ID
-              </span>
+            <div className="dashboardActivityList">
+              {recentLogs.length === 0 ? (
+                <div className="dashboardEmpty">
+                  No activity recorded yet.
+                </div>
+              ) : (
+                recentLogs.map((log) => (
+                  <div
+                    className="dashboardActivityItem"
+                    key={log.id}
+                  >
+                    <span
+                      className={`dashboardActivityDot ${log.level}`}
+                    />
 
-              <strong>
-                {server?.placeId ??
-                  "-"}
-              </strong>
+                    <div>
+                      <strong>
+                        {log.message}
+                      </strong>
+
+                      <span>
+                        {log.username
+                          ? `@${log.username} • `
+                          : ""}
+                        {formatDate(
+                          log.createdAt
+                        )}
+                      </span>
+                    </div>
+
+                    <em>
+                      {log.level.toUpperCase()}
+                    </em>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+          <section className="dashboardPanel">
+            <div className="dashboardPanelHeader">
+              <div>
+                <span className="dashboardEyebrow">
+                  LIVE PLAYERS
+                </span>
+
+                <h3>
+                  Player Snapshot
+                </h3>
+              </div>
+
+              <button
+                className="dashboardTextButton"
+                onClick={() =>
+                  setActivePage("Players")
+                }
+              >
+                VIEW ALL
+              </button>
             </div>
 
-            <div>
-              <span>
-                GAME ID
-              </span>
+            <div className="dashboardPlayerList">
+              {players.length === 0 ? (
+                <div className="dashboardEmpty">
+                  No players online.
+                </div>
+              ) : (
+                players
+                  .slice(0, 5)
+                  .map((player) => (
+                    <button
+                      key={player.userId}
+                      onClick={() =>
+                        watchPlayer(player)
+                      }
+                    >
+                      <span className="dashboardAvatar">
+                        {(
+                          player.displayName ||
+                          player.username
+                        )
+                          .slice(0, 1)
+                          .toUpperCase()}
+                      </span>
 
-              <strong>
-                {server?.gameId ??
-                  "-"}
-              </strong>
+                      <span className="dashboardPlayerIdentity">
+                        <strong>
+                          {player.displayName}
+                        </strong>
+
+                        <small>
+                          @{player.username}
+                        </small>
+                      </span>
+
+                      <span className="dashboardPlayerMeta">
+                        {Math.round(
+                          healthPercent(
+                            player
+                          )
+                        )}
+                        % HP
+                      </span>
+                    </button>
+                  ))
+              )}
             </div>
-
-            <div>
-              <span>
-                VEHICLES
-              </span>
-
-              <strong>
-                {vehicles.length}
-              </strong>
-            </div>
-
-            <div>
-              <span>LOGS</span>
-
-              <strong>
-                {logs.length}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                SERVER ID
-              </span>
-
-              <strong>
-                {server?.serverId ??
-                  "-"}
-              </strong>
-            </div>
-          </div>
+          </section>
         </div>
       </div>
     );

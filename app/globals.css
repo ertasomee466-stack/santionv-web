@@ -2923,3 +2923,475 @@ select:focus {
     display: none;
   }
 }
+
+/* =========================================================
+   SANTIONV DASHBOARD V2
+   ========================================================= */
+
+.dashboardV2 {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboardHero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border: 1px solid #1d2a34;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0,168,255,.12), transparent 34%),
+    linear-gradient(180deg, #091116 0%, #070d11 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+.dashboardHero h2,
+.dashboardPanel h3 {
+  margin: 5px 0 0;
+  color: #f4f8fb;
+}
+
+.dashboardHero h2 {
+  font-size: 24px;
+}
+
+.dashboardHero p {
+  max-width: 620px;
+  margin: 8px 0 0;
+  color: #718494;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.dashboardEyebrow {
+  color: #00a8ff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+
+.dashboardLive {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.dashboardLive.online {
+  color: #00e676;
+  border: 1px solid rgba(0,230,118,.28);
+  background: rgba(0,230,118,.07);
+}
+
+.dashboardLive.offline {
+  color: #ff5656;
+  border: 1px solid rgba(255,86,86,.28);
+  background: rgba(255,86,86,.07);
+}
+
+.dashboardLiveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.dashboardMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashboardMetricCard {
+  min-height: 142px;
+  padding: 18px;
+  text-align: left;
+  color: inherit;
+  border: 1px solid #1b2831;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(11,20,26,.98), rgba(7,13,17,.98));
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+
+.dashboardMetricCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0,168,255,.48);
+  box-shadow: 0 10px 30px rgba(0,0,0,.24), 0 0 24px rgba(0,168,255,.05);
+}
+
+.dashboardMetricLabel {
+  display: block;
+  color: #6f8393;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.dashboardMetricCard strong {
+  display: block;
+  margin-top: 11px;
+  color: #f6fbff;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.dashboardMetricCard small {
+  display: block;
+  margin-top: 8px;
+  color: #657887;
+  font-size: 10px;
+}
+
+.dashboardCardLink {
+  display: block;
+  margin-top: 14px;
+  color: #00a8ff;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.dashboardProgress {
+  height: 3px;
+  margin-top: 17px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #14212a;
+}
+
+.dashboardProgress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0066ff, #38bdf8);
+  box-shadow: 0 0 12px rgba(0,168,255,.45);
+  transition: width .4s ease;
+}
+
+.dashboardMainGrid,
+.dashboardBottomGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboardMainGrid {
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, .8fr);
+}
+
+.dashboardBottomGrid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+}
+
+.dashboardPanel {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #1b2831;
+  border-radius: 12px;
+  background: #080f13;
+}
+
+.dashboardPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.dashboardPanel h3 {
+  font-size: 15px;
+}
+
+.dashboardRefreshButton,
+.dashboardTextButton {
+  border: 1px solid rgba(0,168,255,.28);
+  border-radius: 7px;
+  background: rgba(0,168,255,.06);
+  color: #38bdf8;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.dashboardRefreshButton {
+  padding: 8px 11px;
+}
+
+.dashboardTextButton {
+  padding: 7px 9px;
+}
+
+.dashboardRefreshButton:hover,
+.dashboardTextButton:hover {
+  border-color: rgba(0,168,255,.58);
+  background: rgba(0,168,255,.12);
+}
+
+.dashboardHealthGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.dashboardHealthGrid > div {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #17242d;
+  border-radius: 9px;
+  background: #071015;
+}
+
+.dashboardHealthGrid span,
+.dashboardServerId span {
+  display: block;
+  color: #617483;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.dashboardHealthGrid strong {
+  display: block;
+  margin-top: 6px;
+  overflow: hidden;
+  color: #e8f1f7;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+.dashboardServerId {
+  margin-top: 9px;
+  padding: 12px 13px;
+  border: 1px solid #17242d;
+  border-radius: 9px;
+  background: #071015;
+}
+
+.dashboardServerId code {
+  display: block;
+  margin-top: 7px;
+  overflow: hidden;
+  color: #8ba1b1;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboardQuickGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.dashboardQuickGrid button {
+  min-height: 82px;
+  padding: 13px;
+  text-align: left;
+  border: 1px solid #17242d;
+  border-radius: 9px;
+  background: #071015;
+  color: #dce9f2;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.dashboardQuickGrid button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0,168,255,.42);
+  background: rgba(0,168,255,.055);
+}
+
+.dashboardQuickGrid strong,
+.dashboardQuickGrid span {
+  display: block;
+}
+
+.dashboardQuickGrid strong {
+  font-size: 10px;
+}
+
+.dashboardQuickGrid span {
+  margin-top: 6px;
+  color: #647887;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.dashboardActivityList,
+.dashboardPlayerList {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.dashboardActivityItem {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  min-height: 54px;
+  padding: 10px 12px;
+  border: 1px solid #15222a;
+  border-radius: 9px;
+  background: #071015;
+}
+
+.dashboardActivityDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00a8ff;
+  box-shadow: 0 0 10px rgba(0,168,255,.35);
+}
+
+.dashboardActivityDot.success,
+.dashboardActivityDot.player {
+  background: #00e676;
+}
+
+.dashboardActivityDot.warning {
+  background: #ffd740;
+}
+
+.dashboardActivityDot.error,
+.dashboardActivityDot.ban {
+  background: #ff5656;
+}
+
+.dashboardActivityDot.admin {
+  background: #a970ff;
+}
+
+.dashboardActivityItem strong,
+.dashboardActivityItem span {
+  display: block;
+}
+
+.dashboardActivityItem strong {
+  overflow: hidden;
+  color: #dce8ef;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboardActivityItem span {
+  margin-top: 4px;
+  color: #566a79;
+  font-size: 8px;
+}
+
+.dashboardActivityItem em {
+  color: #526674;
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: .07em;
+}
+
+.dashboardPlayerList button {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px;
+  text-align: left;
+  border: 1px solid #15222a;
+  border-radius: 9px;
+  background: #071015;
+  color: inherit;
+}
+
+.dashboardPlayerList button:hover {
+  border-color: rgba(0,168,255,.4);
+  background: rgba(0,168,255,.045);
+}
+
+.dashboardAvatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(0,168,255,.28);
+  border-radius: 9px;
+  background: rgba(0,168,255,.08);
+  color: #38bdf8;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.dashboardPlayerIdentity {
+  min-width: 0;
+}
+
+.dashboardPlayerIdentity strong,
+.dashboardPlayerIdentity small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboardPlayerIdentity strong {
+  color: #e7f0f6;
+  font-size: 10px;
+}
+
+.dashboardPlayerIdentity small {
+  margin-top: 3px;
+  color: #5f7483;
+  font-size: 8px;
+}
+
+.dashboardPlayerMeta {
+  color: #00e676;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.dashboardEmpty {
+  display: grid;
+  min-height: 92px;
+  place-items: center;
+  border: 1px dashed #1b2a34;
+  border-radius: 9px;
+  color: #526673;
+  font-size: 9px;
+}
+
+@media (max-width: 1050px) {
+  .dashboardMetricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboardMainGrid,
+  .dashboardBottomGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboardHero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboardMetricGrid,
+  .dashboardHealthGrid,
+  .dashboardQuickGrid {
+    grid-template-columns: 1fr;
+  }
+}
