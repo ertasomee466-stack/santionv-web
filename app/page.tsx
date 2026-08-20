@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type PlayerPosition = {
   x: number;
@@ -369,16 +369,16 @@ export default function Home() {
   const [toast, setToast] =
     useState<ToastState | null>(null);
 
-  const [
-    cursorTrail,
-    setCursorTrail,
-  ] = useState<
-    Array<{
-      id: number;
-      x: number;
-      y: number;
-    }>
-  >([]);
+
+  const panelRef =
+    useRef<HTMLElement | null>(null);
+
+  const cursorRef =
+    useRef<HTMLDivElement | null>(null);
+
+  const trailLayerRef =
+    useRef<HTMLDivElement | null>(null);
+
 
   const [
     confirmModal,
@@ -793,10 +793,99 @@ export default function Home() {
   }, [liveLogsEnabled]);
 
   useEffect(() => {
-    if (activePage === "Console") {
-      setNewLogCount(0);
+    const panel =
+      panelRef.current;
+
+    const cursor =
+      cursorRef.current;
+
+    const trailLayer =
+      trailLayerRef.current;
+
+    if (
+      !panel ||
+      !cursor ||
+      !trailLayer
+    ) {
+      return;
     }
-  }, [activePage, logs]);
+
+    let lastTrailTime = 0;
+
+    const handlePointerMove = (
+      event: PointerEvent
+    ) => {
+      const x = event.clientX;
+      const y = event.clientY;
+
+      panel.style.setProperty(
+        "--mouse-x",
+        `${x}px`
+      );
+
+      panel.style.setProperty(
+        "--mouse-y",
+        `${y}px`
+      );
+
+      cursor.style.left =
+        `${x}px`;
+
+      cursor.style.top =
+        `${y}px`;
+
+      const now =
+        performance.now();
+
+      if (
+        now - lastTrailTime <
+        22
+      ) {
+        return;
+      }
+
+      lastTrailTime = now;
+
+      const point =
+        document.createElement(
+          "span"
+        );
+
+      point.className =
+        "cursorTrailPoint";
+
+      point.style.left =
+        `${x}px`;
+
+      point.style.top =
+        `${y}px`;
+
+      trailLayer.appendChild(
+        point
+      );
+
+      window.setTimeout(() => {
+        point.remove();
+      }, 430);
+    };
+
+    window.addEventListener(
+      "pointermove",
+      handlePointerMove,
+      {
+        passive: true,
+      }
+    );
+
+    return () => {
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+
+      trailLayer.replaceChildren();
+    };
+  }, []);
 
   /* ======================================================
      FILTERS
@@ -4426,42 +4515,8 @@ export default function Home() {
 
   return (
     <main
+      ref={panelRef}
       className="panel"
-      onMouseMove={(event) => {
-        event.currentTarget.style.setProperty(
-          "--mouse-x",
-          `${event.clientX}px`
-        );
-
-        event.currentTarget.style.setProperty(
-          "--mouse-y",
-          `${event.clientY}px`
-        );
-
-        const id =
-          Date.now() +
-          Math.random();
-
-        const point = {
-          id,
-          x: event.clientX,
-          y: event.clientY,
-        };
-
-        setCursorTrail((current) => [
-          ...current.slice(-13),
-          point,
-        ]);
-
-        window.setTimeout(() => {
-          setCursorTrail((current) =>
-            current.filter(
-              (item) =>
-                item.id !== id
-            )
-          );
-        }, 420);
-      }}
     >
       <aside className="sidebar">
         <div className="logo">
@@ -4611,40 +4666,17 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="customCursor" />
+      <div
+        ref={cursorRef}
+        className="customCursor"
+        aria-hidden="true"
+      />
 
       <div
+        ref={trailLayerRef}
         className="cursorTrailLayer"
         aria-hidden="true"
-      >
-        {cursorTrail.map(
-          (point, index) => (
-            <span
-              className="cursorTrailPoint"
-              key={point.id}
-              style={{
-                left: point.x,
-                top: point.y,
-                opacity:
-                  (index + 1) /
-                  Math.max(
-                    cursorTrail.length,
-                    1
-                  ),
-                transform: `translate(-50%, -50%) scale(${
-                  0.35 +
-                  ((index + 1) /
-                    Math.max(
-                      cursorTrail.length,
-                      1
-                    )) *
-                    0.65
-                })`,
-              }}
-            />
-          )
-        )}
-      </div>
+      />
 
       {toast && (
         <div
