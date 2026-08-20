@@ -2047,3 +2047,324 @@ nav {
     height: 430px;
   }
 }
+
+/* =========================================================
+   PREMIUM SMOOTH INTERACTION LAYER
+   ========================================================= */
+
+:root {
+  --snv-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --snv-fast: 160ms;
+  --snv-normal: 260ms;
+  --snv-slow: 420ms;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+.navItem,
+.statCard,
+.largePanel,
+.serverSelector,
+.playerCard,
+.lookupCard,
+.vehicleCard,
+.adminCard,
+.permissionCard,
+.banCard,
+.consoleLogCard,
+.mapPlayerDot {
+  transition:
+    transform var(--snv-normal) var(--snv-ease),
+    border-color var(--snv-normal) var(--snv-ease),
+    background-color var(--snv-normal) var(--snv-ease),
+    color var(--snv-normal) var(--snv-ease),
+    box-shadow var(--snv-normal) var(--snv-ease),
+    opacity var(--snv-normal) var(--snv-ease);
+}
+
+button {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0) scale(0.975);
+  transition-duration: 90ms;
+}
+
+.smallButton:hover:not(:disabled),
+.adminSaveButton:hover:not(:disabled) {
+  border-color: #0da85b;
+  background: #08472a;
+  box-shadow:
+    0 0 0 1px rgba(0, 230, 118, 0.08),
+    0 8px 26px rgba(0, 230, 118, 0.12);
+}
+
+.dangerButton:hover:not(:disabled) {
+  border-color: #a73c3c;
+  background: #3a1010;
+  box-shadow:
+    0 8px 24px rgba(255, 78, 78, 0.12);
+}
+
+.adminToggleButton:hover:not(:disabled) {
+  border-color: #8a7429;
+  background: #3a2f0b;
+  box-shadow:
+    0 8px 22px rgba(229, 198, 85, 0.08);
+}
+
+.navItem {
+  position: relative;
+  overflow: hidden;
+}
+
+.navItem::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 230, 118, 0.09),
+      rgba(0, 230, 118, 0.02),
+      transparent
+    );
+  transform: translateX(-22px);
+  transition:
+    opacity var(--snv-normal) var(--snv-ease),
+    transform var(--snv-normal) var(--snv-ease);
+}
+
+.navItem:hover::before,
+.navItem.active::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.navItem > * {
+  position: relative;
+  z-index: 1;
+}
+
+.navItem:hover {
+  transform: translateX(3px);
+}
+
+.navItem.active {
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 230, 118, 0.05),
+    0 7px 18px rgba(0, 230, 118, 0.05);
+}
+
+.statCard,
+.largePanel,
+.lookupCard,
+.vehicleCard,
+.adminCard,
+.banCard,
+.permissionCard,
+.serverSelector {
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::after,
+.lookupCard::after,
+.vehicleCard::after,
+.adminCard::after,
+.permissionCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(
+      520px circle at 20% 0%,
+      rgba(0, 230, 118, 0.08),
+      transparent 38%
+    );
+  transition: opacity var(--snv-slow) var(--snv-ease);
+}
+
+.statCard:hover::after,
+.lookupCard:hover::after,
+.vehicleCard:hover::after,
+.adminCard:hover::after,
+.permissionCard:hover::after {
+  opacity: 1;
+}
+
+.statCard:hover,
+.lookupCard:hover,
+.vehicleCard:hover,
+.adminCard:hover {
+  transform: translateY(-3px);
+  border-color: #2a3b45;
+  box-shadow:
+    0 16px 38px rgba(0, 0, 0, 0.24),
+    0 0 0 1px rgba(0, 230, 118, 0.03);
+}
+
+.largePanel:hover {
+  border-color: #26343d;
+}
+
+.permissionCard:hover {
+  transform: translateY(-2px);
+}
+
+.permissionCardActive {
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 230, 118, 0.05),
+    0 8px 20px rgba(0, 230, 118, 0.06);
+}
+
+.playerCard {
+  cursor: pointer;
+}
+
+.playerCard:hover {
+  background: #0a1115;
+  transform: translateX(3px);
+}
+
+.playerCard:hover .playerAvatar {
+  border-color: #17603d;
+  color: #00e676;
+  box-shadow: 0 0 14px rgba(0, 230, 118, 0.1);
+}
+
+input,
+select {
+  transition:
+    border-color var(--snv-fast) ease,
+    box-shadow var(--snv-fast) ease,
+    background-color var(--snv-fast) ease;
+}
+
+input:hover,
+select:hover {
+  border-color: #33434d;
+}
+
+input:focus,
+select:focus {
+  border-color: #0c7943 !important;
+  box-shadow:
+    0 0 0 3px rgba(0, 230, 118, 0.06);
+  background: #0a1014;
+}
+
+.modulePage,
+.monitor {
+  animation: snvPageIn 360ms var(--snv-ease);
+}
+
+@keyframes snvPageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.serverDot,
+.statusDot,
+.onlineBadge span,
+.legendDot {
+  animation: snvPulse 1.8s ease-in-out infinite;
+}
+
+.serverDotOffline,
+.statusDotOffline,
+.offlineBadge span {
+  animation: none;
+}
+
+@keyframes snvPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.mapPlayerDot {
+  transition:
+    left 420ms var(--snv-ease),
+    top 420ms var(--snv-ease),
+    transform var(--snv-normal) var(--snv-ease),
+    box-shadow var(--snv-normal) var(--snv-ease),
+    border-color var(--snv-normal) var(--snv-ease);
+}
+
+.mapPlayerLabel {
+  transition:
+    opacity var(--snv-fast) ease,
+    transform var(--snv-fast) ease,
+    color var(--snv-fast) ease,
+    border-color var(--snv-fast) ease;
+}
+
+.mapPlayerDot:hover .mapPlayerLabel {
+  transform: translateX(-50%) translateY(2px);
+}
+
+.consoleLogCard {
+  transform-origin: center top;
+}
+
+.consoleLogCard:hover {
+  transform: translateX(2px);
+  border-left: 1px solid rgba(0, 230, 118, 0.18);
+}
+
+.topRight button:hover {
+  border-color: #0d7040;
+  color: #00e676;
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.08);
+}
+
+::-webkit-scrollbar-thumb {
+  transition: background-color var(--snv-fast) ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #35434c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
