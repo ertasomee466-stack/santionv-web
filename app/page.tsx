@@ -370,6 +370,17 @@ export default function Home() {
     useState<ToastState | null>(null);
 
   const [
+    cursorTrail,
+    setCursorTrail,
+  ] = useState<
+    Array<{
+      id: number;
+      x: number;
+      y: number;
+    }>
+  >([]);
+
+  const [
     confirmModal,
     setConfirmModal,
   ] = useState<ConfirmModalState | null>(
@@ -4426,6 +4437,30 @@ export default function Home() {
           "--mouse-y",
           `${event.clientY}px`
         );
+
+        const id =
+          Date.now() +
+          Math.random();
+
+        const point = {
+          id,
+          x: event.clientX,
+          y: event.clientY,
+        };
+
+        setCursorTrail((current) => [
+          ...current.slice(-13),
+          point,
+        ]);
+
+        window.setTimeout(() => {
+          setCursorTrail((current) =>
+            current.filter(
+              (item) =>
+                item.id !== id
+            )
+          );
+        }, 420);
       }}
     >
       <aside className="sidebar">
@@ -4575,6 +4610,41 @@ export default function Home() {
           {renderPage()}
         </div>
       </section>
+
+      <div className="customCursor" />
+
+      <div
+        className="cursorTrailLayer"
+        aria-hidden="true"
+      >
+        {cursorTrail.map(
+          (point, index) => (
+            <span
+              className="cursorTrailPoint"
+              key={point.id}
+              style={{
+                left: point.x,
+                top: point.y,
+                opacity:
+                  (index + 1) /
+                  Math.max(
+                    cursorTrail.length,
+                    1
+                  ),
+                transform: `translate(-50%, -50%) scale(${
+                  0.35 +
+                  ((index + 1) /
+                    Math.max(
+                      cursorTrail.length,
+                      1
+                    )) *
+                    0.65
+                })`,
+              }}
+            />
+          )
+        )}
+      </div>
 
       {toast && (
         <div
