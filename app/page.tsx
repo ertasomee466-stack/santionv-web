@@ -174,6 +174,21 @@ type LookupUser = {
   isBanned: boolean;
 };
 
+type ToastKind = "success" | "error" | "info" | "warning";
+
+type ToastState = {
+  message: string;
+  kind: ToastKind;
+};
+
+type ConfirmModalState = {
+  title: string;
+  message: string;
+  confirmText: string;
+  danger?: boolean;
+  onConfirm: () => void | Promise<void>;
+};
+
 type LookupApiResponse = {
   success: boolean;
   found?: boolean;
@@ -349,6 +364,71 @@ export default function Home() {
     commandLoading,
     setCommandLoading,
   ] = useState(false);
+
+
+  const [toast, setToast] =
+    useState<ToastState | null>(null);
+
+  const [
+    confirmModal,
+    setConfirmModal,
+  ] = useState<ConfirmModalState | null>(
+    null
+  );
+
+  const [
+    confirmLoading,
+    setConfirmLoading,
+  ] = useState(false);
+
+  function showToast(
+    message: string,
+    kind: ToastKind = "success"
+  ) {
+    setToast({
+      message,
+      kind,
+    });
+
+    window.setTimeout(() => {
+      setToast((current) =>
+        current?.message === message
+          ? null
+          : current
+      );
+    }, 3200);
+  }
+
+  function requestConfirm(
+    modal: ConfirmModalState
+  ) {
+    setConfirmModal(modal);
+  }
+
+  async function confirmCurrentAction() {
+    if (!confirmModal) {
+      return;
+    }
+
+    setConfirmLoading(true);
+
+    try {
+      await confirmModal.onConfirm();
+      setConfirmModal(null);
+    } catch (error) {
+      console.error(
+        "[SantionV Confirm Action]",
+        error
+      );
+
+      showToast(
+        "Action failed.",
+        "error"
+      );
+    } finally {
+      setConfirmLoading(false);
+    }
+  }
 
   /* ======================================================
      BAN FORM
@@ -887,6 +967,11 @@ export default function Home() {
         );
       }
 
+      showToast(
+        `${command.toUpperCase()} command sent to ${selectedPlayer.username}.`,
+        "success"
+      );
+
       window.setTimeout(() => {
         loadPlayers();
       }, 1200);
@@ -954,9 +1039,14 @@ export default function Home() {
     setBanPermanent(false);
 
     await loadBans();
+
+    showToast(
+      `Ban saved for ${banUsername || userId}.`,
+      "success"
+    );
   }
 
-  async function unbanPlayer(
+  async function performUnban(
     userId: number
   ) {
     await fetch(
@@ -977,6 +1067,25 @@ export default function Home() {
     );
 
     await loadBans();
+  }
+
+  function unbanPlayer(
+    userId: number
+  ) {
+    requestConfirm({
+      title: "Unban Player",
+      message:
+        "Remove this player's active SantionV ban?",
+      confirmText: "UNBAN",
+      onConfirm: async () => {
+        await performUnban(userId);
+
+        showToast(
+          "Player unbanned.",
+          "success"
+        );
+      },
+    });
   }
 
   /* ======================================================
@@ -1136,9 +1245,16 @@ export default function Home() {
     resetAdminForm();
 
     await loadAdmins();
+
+    showToast(
+      action === "add"
+        ? "Admin added."
+        : "Admin updated.",
+      "success"
+    );
   }
 
-  async function removeAdmin(
+  async function performRemoveAdmin(
     userId: number
   ) {
     await fetch(
@@ -1165,6 +1281,28 @@ export default function Home() {
     }
 
     await loadAdmins();
+  }
+
+  function removeAdmin(
+    userId: number
+  ) {
+    requestConfirm({
+      title: "Remove Admin",
+      message:
+        "This admin will lose their SantionV panel permissions.",
+      confirmText: "REMOVE",
+      danger: true,
+      onConfirm: async () => {
+        await performRemoveAdmin(
+          userId
+        );
+
+        showToast(
+          "Admin removed.",
+          "success"
+        );
+      },
+    });
   }
 
   async function toggleAdminActive(
@@ -1208,6 +1346,13 @@ export default function Home() {
     );
 
     await loadAdmins();
+
+    showToast(
+      admin.active
+        ? "Admin disabled."
+        : "Admin enabled.",
+      "info"
+    );
   }
 
   /* ======================================================
@@ -1246,6 +1391,11 @@ export default function Home() {
 
     if (data.config) {
       setConfig(data.config);
+
+      showToast(
+        "Configuration updated.",
+        "success"
+      );
     }
   }
 
@@ -1253,7 +1403,7 @@ export default function Home() {
      LOGS
      ====================================================== */
 
-  async function clearLogs() {
+  async function performClearLogs() {
     await fetch(
       "/api/roblox/logs",
       {
@@ -1262,6 +1412,24 @@ export default function Home() {
     );
 
     await loadLogs();
+  }
+
+  function clearLogs() {
+    requestConfirm({
+      title: "Clear Console Logs",
+      message:
+        "All stored console logs will be deleted. This cannot be undone.",
+      confirmText: "CLEAR LOGS",
+      danger: true,
+      onConfirm: async () => {
+        await performClearLogs();
+
+        showToast(
+          "Console logs cleared.",
+          "success"
+        );
+      },
+    });
   }
 
   function watchPlayer(
@@ -1614,8 +1782,22 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="panelMessage">
-              Loading...
+            <div className="skeletonList">
+              {Array.from({
+                length: 6,
+              }).map((_, index) => (
+                <div
+                  className="skeletonRow"
+                  key={index}
+                >
+                  <div className="skeletonCircle" />
+                  <div className="skeletonLines">
+                    <span />
+                    <span />
+                  </div>
+                  <div className="skeletonBlock" />
+                </div>
+              ))}
             </div>
           ) : filteredPlayers.length ===
             0 ? (
@@ -4232,7 +4414,20 @@ export default function Home() {
      ====================================================== */
 
   return (
-    <main className="panel">
+    <main
+      className="panel"
+      onMouseMove={(event) => {
+        event.currentTarget.style.setProperty(
+          "--mouse-x",
+          `${event.clientX}px`
+        );
+
+        event.currentTarget.style.setProperty(
+          "--mouse-y",
+          `${event.clientY}px`
+        );
+      }}
+    >
       <aside className="sidebar">
         <div className="logo">
           <div className="logoIcon">
@@ -4373,8 +4568,94 @@ export default function Home() {
           </div>
         </div>
 
-        {renderPage()}
+        <div
+          className="pageTransition"
+          key={activePage}
+        >
+          {renderPage()}
+        </div>
       </section>
+
+      {toast && (
+        <div
+          className={`toast toast-${toast.kind}`}
+          role="status"
+        >
+          <span className="toastDot" />
+          <strong>
+            {toast.message}
+          </strong>
+
+          <button
+            onClick={() =>
+              setToast(null)
+            }
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {confirmModal && (
+        <div
+          className="modalBackdrop"
+          onMouseDown={(event) => {
+            if (
+              event.target ===
+              event.currentTarget &&
+              !confirmLoading
+            ) {
+              setConfirmModal(null);
+            }
+          }}
+        >
+          <div className="confirmModal">
+            <div className="confirmModalIcon">
+              !
+            </div>
+
+            <h2>
+              {confirmModal.title}
+            </h2>
+
+            <p>
+              {confirmModal.message}
+            </p>
+
+            <div className="confirmModalActions">
+              <button
+                className="smallButton modalCancelButton"
+                disabled={
+                  confirmLoading
+                }
+                onClick={() =>
+                  setConfirmModal(null)
+                }
+              >
+                CANCEL
+              </button>
+
+              <button
+                className={
+                  confirmModal.danger
+                    ? "dangerButton"
+                    : "adminSaveButton"
+                }
+                disabled={
+                  confirmLoading
+                }
+                onClick={
+                  confirmCurrentAction
+                }
+              >
+                {confirmLoading
+                  ? "WORKING..."
+                  : confirmModal.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
