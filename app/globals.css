@@ -3395,3 +3395,117 @@ select:focus {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   TOPBAR DISCORD USER PROFILE
+   ========================================================= */
+
+.topRight {
+  gap: 10px;
+}
+
+.topPlayerCount {
+  color: #71808a;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.topRefreshButton {
+  width: 30px !important;
+  height: 28px !important;
+  display: grid;
+  place-items: center;
+  border: 1px solid #263642 !important;
+  border-radius: 7px !important;
+  background: #081015 !important;
+  color: #b8c7d2 !important;
+  font-size: 16px !important;
+}
+
+.topRefreshButton:hover {
+  border-color: rgba(0, 168, 255, 0.55) !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 0 16px rgba(0, 168, 255, 0.08);
+}
+
+.topDivider {
+  width: 1px;
+  height: 25px;
+  background: #1b2933;
+}
+
+.discordUserChip {
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #eef6fb;
+  text-align: left;
+}
+
+.discordUserChip:hover {
+  border-color: rgba(0, 168, 255, 0.22);
+  background: rgba(0, 168, 255, 0.045);
+}
+
+.discordUserAvatar,
+.discordUserAvatarFallback {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 1px solid #304350;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #0a151c;
+}
+
+.discordUserAvatarFallback {
+  display: grid;
+  place-items: center;
+  color: #38bdf8;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.discordUserText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.discordUserText strong {
+  max-width: 135px;
+  overflow: hidden;
+  color: #f2f7fa;
+  font-size: 9px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.discordUserText small {
+  color: #00a8ff;
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+@media (max-width: 800px) {
+  .discordUserText {
+    display: none;
+  }
+
+  .discordUserChip {
+    padding-right: 4px;
+  }
+
+  .topDivider {
+    display: none;
+  }
+}

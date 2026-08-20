@@ -1,3 +1,6 @@
+
+
+
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -287,6 +290,15 @@ function formatDate(timestamp: number) {
   );
 }
 
+type AuthUser = {
+  discordId: string;
+  username: string;
+  displayName: string;
+  avatar: string | null;
+  role: "owner" | "admin";
+  permissions: string[];
+};
+
 export default function Home() {
   const [activePage, setActivePage] =
     useState("Live Monitor");
@@ -300,6 +312,12 @@ export default function Home() {
 
   const [serverOnline, setServerOnline] =
     useState(false);
+
+  const [authUser, setAuthUser] =
+    useState<AuthUser | null>(null);
+
+  const [authLoading, setAuthLoading] =
+    useState(true);
 
   const [loading, setLoading] =
     useState(true);
@@ -531,6 +549,53 @@ export default function Home() {
     lastLogRefresh,
     setLastLogRefresh,
   ] = useState<number | null>(null);
+
+  /* ======================================================
+     LOAD AUTH USER
+     ====================================================== */
+
+  async function loadAuthUser() {
+    try {
+      const response = await fetch(
+        "/api/auth/me",
+        {
+          cache: "no-store",
+        }
+      );
+
+      if (!response.ok) {
+        setAuthUser(null);
+        setAuthLoading(false);
+        return;
+      }
+
+      const data =
+        await response.json();
+
+      setAuthUser(
+        data?.authenticated
+          ? data.user ?? null
+          : null
+      );
+    } catch {
+      setAuthUser(null);
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function logout() {
+    try {
+      await fetch(
+        "/api/auth/logout",
+        {
+          method: "POST",
+        }
+      );
+    } finally {
+      window.location.href = "/";
+    }
+  }
 
   /* ======================================================
      LOAD PLAYERS
@@ -765,6 +830,7 @@ export default function Home() {
   }
 
   useEffect(() => {
+    loadAuthUser();
     loadEverything();
 
     const interval =
@@ -5139,18 +5205,68 @@ export default function Home() {
           </div>
 
           <div className="topRight">
-            <span>
+            <span className="topPlayerCount">
               {players.length}{" "}
               Players
             </span>
 
             <button
+              className="topRefreshButton"
               onClick={
                 loadEverything
               }
+              aria-label="Refresh"
             >
               ↻
             </button>
+
+            {!authLoading && authUser && (
+              <>
+                <span className="topDivider" />
+
+                <button
+                  className="discordUserChip"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Discord hesabından çıkış yapılsın mı?"
+                      )
+                    ) {
+                      void logout();
+                    }
+                  }}
+                  title="Çıkış yapmak için tıkla"
+                >
+                  {authUser.avatar ? (
+                    <img
+                      src={authUser.avatar}
+                      alt={authUser.displayName}
+                      className="discordUserAvatar"
+                    />
+                  ) : (
+                    <span className="discordUserAvatarFallback">
+                      {(
+                        authUser.displayName ||
+                        authUser.username
+                      )
+                        .slice(0, 1)
+                        .toUpperCase()}
+                    </span>
+                  )}
+
+                  <span className="discordUserText">
+                    <strong>
+                      {authUser.displayName ||
+                        authUser.username}
+                    </strong>
+
+                    <small>
+                      {authUser.role.toUpperCase()}
+                    </small>
+                  </span>
+                </button>
+              </>
+            )}
           </div>
         </header>
 
