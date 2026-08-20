@@ -376,8 +376,8 @@ export default function Home() {
   const cursorRef =
     useRef<HTMLDivElement | null>(null);
 
-  const trailLayerRef =
-    useRef<HTMLDivElement | null>(null);
+  const trailCanvasRef =
+    useRef<HTMLCanvasElement | null>(null);
 
 
   const [
@@ -799,18 +799,71 @@ export default function Home() {
     const cursor =
       cursorRef.current;
 
-    const trailLayer =
-      trailLayerRef.current;
+    const canvas =
+      trailCanvasRef.current;
 
     if (
       !panel ||
       !cursor ||
-      !trailLayer
+      !canvas
     ) {
       return;
     }
 
-    let lastTrailTime = 0;
+    const context =
+      canvas.getContext("2d");
+
+    if (!context) {
+      return;
+    }
+
+    type TrailPoint = {
+      x: number;
+      y: number;
+      time: number;
+    };
+
+    let points: TrailPoint[] = [];
+    let frame = 0;
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+
+    const resizeCanvas = () => {
+      dpr = Math.min(
+        window.devicePixelRatio || 1,
+        2
+      );
+
+      width =
+        window.innerWidth;
+
+      height =
+        window.innerHeight;
+
+      canvas.width =
+        Math.floor(width * dpr);
+
+      canvas.height =
+        Math.floor(height * dpr);
+
+      canvas.style.width =
+        `${width}px`;
+
+      canvas.style.height =
+        `${height}px`;
+
+      context.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+      );
+    };
+
+    resizeCanvas();
 
     const handlePointerMove = (
       event: PointerEvent
@@ -834,40 +887,137 @@ export default function Home() {
       cursor.style.top =
         `${y}px`;
 
+      points.push({
+        x,
+        y,
+        time: performance.now(),
+      });
+
+      if (points.length > 42) {
+        points =
+          points.slice(-42);
+      }
+    };
+
+    const drawTrail = () => {
       const now =
         performance.now();
 
-      if (
-        now - lastTrailTime <
-        22
-      ) {
-        return;
-      }
-
-      lastTrailTime = now;
-
-      const point =
-        document.createElement(
-          "span"
-        );
-
-      point.className =
-        "cursorTrailPoint";
-
-      point.style.left =
-        `${x}px`;
-
-      point.style.top =
-        `${y}px`;
-
-      trailLayer.appendChild(
-        point
+      points = points.filter(
+        (point) =>
+          now - point.time < 520
       );
 
-      window.setTimeout(() => {
-        point.remove();
-      }, 430);
+      context.clearRect(
+        0,
+        0,
+        width,
+        height
+      );
+
+      if (points.length > 1) {
+        context.save();
+
+        context.lineCap =
+          "round";
+
+        context.lineJoin =
+          "round";
+
+        for (
+          let i = 1;
+          i < points.length;
+          i++
+        ) {
+          const previous =
+            points[i - 1];
+
+          const current =
+            points[i];
+
+          const age =
+            now - current.time;
+
+          const life =
+            Math.max(
+              0,
+              1 - age / 520
+            );
+
+          const gradient =
+            context.createLinearGradient(
+              previous.x,
+              previous.y,
+              current.x,
+              current.y
+            );
+
+          gradient.addColorStop(
+            0,
+            `rgba(0, 102, 255, ${
+              life * 0.12
+            })`
+          );
+
+          gradient.addColorStop(
+            1,
+            `rgba(0, 168, 255, ${
+              life * 0.95
+            })`
+          );
+
+          context.beginPath();
+
+          context.moveTo(
+            previous.x,
+            previous.y
+          );
+
+          const midX =
+            (previous.x +
+              current.x) /
+            2;
+
+          const midY =
+            (previous.y +
+              current.y) /
+            2;
+
+          context.quadraticCurveTo(
+            previous.x,
+            previous.y,
+            midX,
+            midY
+          );
+
+          context.lineWidth =
+            1.5 + life * 3.3;
+
+          context.strokeStyle =
+            gradient;
+
+          context.shadowColor =
+            "rgba(0, 168, 255, 0.85)";
+
+          context.shadowBlur =
+            7 + life * 10;
+
+          context.stroke();
+        }
+
+        context.restore();
+      }
+
+      frame =
+        window.requestAnimationFrame(
+          drawTrail
+        );
     };
+
+    frame =
+      window.requestAnimationFrame(
+        drawTrail
+      );
 
     window.addEventListener(
       "pointermove",
@@ -877,13 +1027,25 @@ export default function Home() {
       }
     );
 
+    window.addEventListener(
+      "resize",
+      resizeCanvas
+    );
+
     return () => {
       window.removeEventListener(
         "pointermove",
         handlePointerMove
       );
 
-      trailLayer.replaceChildren();
+      window.removeEventListener(
+        "resize",
+        resizeCanvas
+      );
+
+      window.cancelAnimationFrame(
+        frame
+      );
     };
   }, []);
 
@@ -4672,9 +4834,9 @@ export default function Home() {
         aria-hidden="true"
       />
 
-      <div
-        ref={trailLayerRef}
-        className="cursorTrailLayer"
+      <canvas
+        ref={trailCanvasRef}
+        className="cursorTrailCanvas"
         aria-hidden="true"
       />
 

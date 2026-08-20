@@ -1,6 +1,3 @@
-
-
-
 * {
   box-sizing: border-box;
   margin: 0;
@@ -89,7 +86,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background: #00e676;
+  background: #00a8ff;
   color: #03150b;
   font-size: 17px;
   font-weight: 900;
@@ -151,8 +148,8 @@ button:disabled {
   height: 7px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #00e676;
-  box-shadow: 0 0 10px rgba(0, 230, 118, 0.7);
+  background: #00a8ff;
+  box-shadow: 0 0 10px rgba(0, 168, 255, 0.7);
 }
 
 .serverDotOffline,
@@ -205,7 +202,7 @@ nav {
 }
 
 .navItem.active span {
-  color: #00e676;
+  color: #00a8ff;
 }
 
 /* ACCOUNT */
@@ -227,7 +224,7 @@ nav {
   justify-content: center;
   border: 1px solid #293640;
   border-radius: 50%;
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .account > div:last-child {
@@ -309,7 +306,7 @@ nav {
   border: 1px solid #086f3c;
   border-radius: 5px;
   background: #062417;
-  color: #00e676;
+  color: #00a8ff;
   font-size: 7px;
   font-weight: 800;
 }
@@ -318,7 +315,7 @@ nav {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #00e676;
+  background: #00a8ff;
 }
 
 .offlineBadge {
@@ -375,7 +372,7 @@ nav {
 }
 
 .greenText {
-  color: #00e676 !important;
+  color: #00a8ff !important;
 }
 
 .redText {
@@ -428,7 +425,7 @@ nav {
 }
 
 .normalInput:focus {
-  border-color: #0c7943;
+  border-color: #0b5f96;
 }
 
 /* SERVER DETAILS */
@@ -485,7 +482,7 @@ nav {
 .configToggle input {
   width: 16px;
   height: 16px;
-  accent-color: #00e676;
+  accent-color: #00a8ff;
 }
 
 .configTextGrid {
@@ -566,7 +563,7 @@ nav {
   padding: 0 11px;
   border: 1px solid #086c3a;
   background: #062417;
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .dangerButton {
@@ -632,7 +629,7 @@ nav {
 }
 
 .ready b {
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .watchArea {
@@ -688,7 +685,7 @@ nav {
 
 .selectedCard > p {
   margin-top: 16px;
-  color: #00e676;
+  color: #00a8ff;
   font-size: 7px;
   font-weight: 800;
 }
@@ -721,7 +718,7 @@ nav {
 .healthFill {
   height: 100%;
   border-radius: 999px;
-  background: #00e676;
+  background: #00a8ff;
   transition: width 0.3s ease;
 }
 
@@ -771,7 +768,7 @@ nav {
 
 .positionTitle {
   margin-bottom: 10px;
-  color: #00e676;
+  color: #00a8ff;
   font-size: 7px;
   font-weight: 800;
   letter-spacing: 1.5px;
@@ -796,7 +793,7 @@ nav {
   border: 1px solid #086c3a;
   border-radius: 5px;
   background: #062417;
-  color: #00e676;
+  color: #00a8ff;
   font-size: 7px;
   font-weight: 700;
 }
@@ -936,7 +933,7 @@ nav {
   border: 1px solid #0b6c3d;
   border-radius: 4px;
   background: #062417;
-  color: #00e676;
+  color: #00a8ff;
   font-size: 6px;
   font-weight: 800;
 }
@@ -951,12 +948,12 @@ nav {
   background-color: #05090b;
   background-image:
     linear-gradient(
-      rgba(0, 230, 118, 0.045) 1px,
+      rgba(0, 168, 255, 0.045) 1px,
       transparent 1px
     ),
     linear-gradient(
       90deg,
-      rgba(0, 230, 118, 0.045) 1px,
+      rgba(0, 168, 255, 0.045) 1px,
       transparent 1px
     );
   background-size: 40px 40px;
@@ -965,7 +962,7 @@ nav {
 .advancedMapBoard {
   min-height: 560px;
   box-shadow:
-    inset 0 0 45px rgba(0, 230, 118, 0.025);
+    inset 0 0 45px rgba(0, 168, 255, 0.025);
 }
 
 .mapAxis {
@@ -999,7 +996,7 @@ nav {
   left: 0;
   width: 100%;
   height: 1px;
-  background: rgba(0, 230, 118, 0.12);
+  background: rgba(0, 168, 255, 0.12);
 }
 
 .mapCrosshairZ {
@@ -1007,7 +1004,7 @@ nav {
   left: 50%;
   width: 1px;
   height: 100%;
-  background: rgba(0, 230, 118, 0.12);
+  background: rgba(0, 168, 255, 0.12);
 }
 
 .mapPlayerDot {
@@ -1019,12 +1016,12 @@ nav {
   border: 1px solid #00a95c;
   border-radius: 50%;
   background: #07331f;
-  color: #00e676;
+  color: #00a8ff;
   font-size: 9px;
   font-weight: 900;
   box-shadow:
-    0 0 0 4px rgba(0, 230, 118, 0.05),
-    0 0 16px rgba(0, 230, 118, 0.18);
+    0 0 0 4px rgba(0, 168, 255, 0.05),
+    0 0 16px rgba(0, 168, 255, 0.18);
   transition:
     transform 0.15s ease,
     border-color 0.15s ease,
@@ -1038,8 +1035,8 @@ nav {
     scale(1.12);
   border-color: #53f49e;
   box-shadow:
-    0 0 0 5px rgba(0, 230, 118, 0.08),
-    0 0 22px rgba(0, 230, 118, 0.3);
+    0 0 0 5px rgba(0, 168, 255, 0.08),
+    0 0 22px rgba(0, 168, 255, 0.3);
 }
 
 .mapPlayerDotSelected {
@@ -1047,8 +1044,8 @@ nav {
   border-color: #72ffb1;
   background: #0b4e2e;
   box-shadow:
-    0 0 0 6px rgba(0, 230, 118, 0.1),
-    0 0 28px rgba(0, 230, 118, 0.42);
+    0 0 0 6px rgba(0, 168, 255, 0.1),
+    0 0 28px rgba(0, 168, 255, 0.42);
 }
 
 .mapPlayerLabel {
@@ -1069,7 +1066,7 @@ nav {
 
 .mapPlayerDot:hover .mapPlayerLabel,
 .mapPlayerDotSelected .mapPlayerLabel {
-  color: #00e676;
+  color: #00a8ff;
   border-color: #12643d;
 }
 
@@ -1102,8 +1099,8 @@ nav {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #00e676;
-  box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
+  background: #00a8ff;
+  box-shadow: 0 0 8px rgba(0, 168, 255, 0.5);
 }
 
 .mapSelectedHeader {
@@ -1125,7 +1122,7 @@ nav {
 }
 
 .mapSelectedHeader span {
-  color: #00e676;
+  color: #00a8ff;
   font-size: 6px;
   font-weight: 800;
   letter-spacing: 1px;
@@ -1189,8 +1186,8 @@ nav {
 
 .liveLogsButtonActive {
   box-shadow:
-    0 0 0 1px rgba(0, 230, 118, 0.08),
-    0 0 14px rgba(0, 230, 118, 0.12);
+    0 0 0 1px rgba(0, 168, 255, 0.08),
+    0 0 14px rgba(0, 168, 255, 0.12);
 }
 
 .consoleLiveStatus {
@@ -1225,7 +1222,7 @@ nav {
 }
 
 .consoleLiveStatus b {
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .consoleLiveDot {
@@ -1233,8 +1230,8 @@ nav {
   height: 7px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #00e676;
-  box-shadow: 0 0 10px rgba(0, 230, 118, 0.65);
+  background: #00a8ff;
+  box-shadow: 0 0 10px rgba(0, 168, 255, 0.65);
   animation: consolePulse 1.4s ease-in-out infinite;
 }
 
@@ -1279,7 +1276,7 @@ nav {
 
 .consoleFilters input:focus,
 .consoleFilters select:focus {
-  border-color: #0c7943;
+  border-color: #0b5f96;
 }
 
 .consoleStats {
@@ -1291,7 +1288,7 @@ nav {
 }
 
 .consoleStats b {
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .consoleBox {
@@ -1359,7 +1356,7 @@ nav {
 
 .consoleLevelBadge.success {
   border-color: #14643c;
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .consoleLevelBadge.warning {
@@ -1385,7 +1382,7 @@ nav {
 
 .consoleLevelBadge.player {
   border-color: #14643c;
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .consoleLogMeta {
@@ -1433,7 +1430,7 @@ nav {
 }
 
 .consoleLine.success strong {
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .consoleLine.warning strong {
@@ -1457,7 +1454,7 @@ nav {
 }
 
 .consoleLine.player strong {
-  color: #00e676;
+  color: #00a8ff;
 }
 
 /* LOOKUP */
@@ -1505,7 +1502,7 @@ nav {
 }
 
 .vehicleCard > span {
-  color: #00e676;
+  color: #00a8ff;
   font-size: 6px;
 }
 
@@ -1556,7 +1553,7 @@ nav {
 .checkboxLine input {
   width: 15px;
   height: 15px;
-  accent-color: #00e676;
+  accent-color: #00a8ff;
 }
 
 .banList {
@@ -1623,7 +1620,7 @@ nav {
 
 .adminFormGrid input:focus,
 .adminFormGrid select:focus {
-  border-color: #0c7943;
+  border-color: #0b5f96;
 }
 
 .adminActiveControl {
@@ -1641,7 +1638,7 @@ nav {
 .adminActiveControl input {
   width: 17px;
   height: 17px;
-  accent-color: #00e676;
+  accent-color: #00a8ff;
 }
 
 /* PERMISSIONS */
@@ -1700,7 +1697,7 @@ nav {
 .permissionCard input {
   width: 15px;
   height: 15px;
-  accent-color: #00e676;
+  accent-color: #00a8ff;
 }
 
 .permissionCard > div {
@@ -1730,7 +1727,7 @@ nav {
   padding: 0 18px;
   border: 1px solid #087a40;
   background: #07351f;
-  color: #00e676;
+  color: #00a8ff;
 }
 
 /* ADMIN CARDS */
@@ -1769,7 +1766,7 @@ nav {
   border: 1px solid #165536;
   border-radius: 7px;
   background: #0a2719;
-  color: #00e676;
+  color: #00a8ff;
   font-size: 13px;
   font-weight: 900;
 }
@@ -1806,7 +1803,7 @@ nav {
 .adminStatus.active {
   border-color: #15643c;
   background: #092819;
-  color: #00e676;
+  color: #00a8ff;
 }
 
 .adminInfoGrid {
@@ -2111,11 +2108,11 @@ button:active:not(:disabled) {
 
 .smallButton:hover:not(:disabled),
 .adminSaveButton:hover:not(:disabled) {
-  border-color: #0da85b;
-  background: #08472a;
+  border-color: #168bd2;
+  background: #082f4a;
   box-shadow:
-    0 0 0 1px rgba(0, 230, 118, 0.08),
-    0 8px 26px rgba(0, 230, 118, 0.12);
+    0 0 0 1px rgba(0, 168, 255, 0.08),
+    0 8px 26px rgba(0, 168, 255, 0.12);
 }
 
 .dangerButton:hover:not(:disabled) {
@@ -2145,8 +2142,8 @@ button:active:not(:disabled) {
   background:
     linear-gradient(
       90deg,
-      rgba(0, 230, 118, 0.09),
-      rgba(0, 230, 118, 0.02),
+      rgba(0, 168, 255, 0.09),
+      rgba(0, 168, 255, 0.02),
       transparent
     );
   transform: translateX(-22px);
@@ -2172,8 +2169,8 @@ button:active:not(:disabled) {
 
 .navItem.active {
   box-shadow:
-    inset 0 0 0 1px rgba(0, 230, 118, 0.05),
-    0 7px 18px rgba(0, 230, 118, 0.05);
+    inset 0 0 0 1px rgba(0, 168, 255, 0.05),
+    0 7px 18px rgba(0, 168, 255, 0.05);
 }
 
 .statCard,
@@ -2201,7 +2198,7 @@ button:active:not(:disabled) {
   background:
     radial-gradient(
       520px circle at 20% 0%,
-      rgba(0, 230, 118, 0.08),
+      rgba(0, 168, 255, 0.08),
       transparent 38%
     );
   transition: opacity var(--snv-slow) var(--snv-ease);
@@ -2223,7 +2220,7 @@ button:active:not(:disabled) {
   border-color: #2a3b45;
   box-shadow:
     0 16px 38px rgba(0, 0, 0, 0.24),
-    0 0 0 1px rgba(0, 230, 118, 0.03);
+    0 0 0 1px rgba(0, 168, 255, 0.03);
 }
 
 .largePanel:hover {
@@ -2236,8 +2233,8 @@ button:active:not(:disabled) {
 
 .permissionCardActive {
   box-shadow:
-    inset 0 0 0 1px rgba(0, 230, 118, 0.05),
-    0 8px 20px rgba(0, 230, 118, 0.06);
+    inset 0 0 0 1px rgba(0, 168, 255, 0.05),
+    0 8px 20px rgba(0, 168, 255, 0.06);
 }
 
 .playerCard {
@@ -2250,9 +2247,9 @@ button:active:not(:disabled) {
 }
 
 .playerCard:hover .playerAvatar {
-  border-color: #17603d;
-  color: #00e676;
-  box-shadow: 0 0 14px rgba(0, 230, 118, 0.1);
+  border-color: #12527a;
+  color: #00a8ff;
+  box-shadow: 0 0 14px rgba(0, 168, 255, 0.1);
 }
 
 input,
@@ -2270,9 +2267,9 @@ select:hover {
 
 input:focus,
 select:focus {
-  border-color: #0c7943 !important;
+  border-color: #0b5f96 !important;
   box-shadow:
-    0 0 0 3px rgba(0, 230, 118, 0.06);
+    0 0 0 3px rgba(0, 168, 255, 0.06);
   background: #0a1014;
 }
 
@@ -2344,13 +2341,13 @@ select:focus {
 
 .consoleLogCard:hover {
   transform: translateX(2px);
-  border-left: 1px solid rgba(0, 230, 118, 0.18);
+  border-left: 1px solid rgba(0, 168, 255, 0.18);
 }
 
 .topRight button:hover {
-  border-color: #0d7040;
-  color: #00e676;
-  box-shadow: 0 0 12px rgba(0, 230, 118, 0.08);
+  border-color: #0b5f96;
+  color: #00a8ff;
+  box-shadow: 0 0 12px rgba(0, 168, 255, 0.08);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -2399,8 +2396,8 @@ select:focus {
   background:
     radial-gradient(
       circle,
-      rgba(0, 230, 118, 0.075) 0%,
-      rgba(0, 230, 118, 0.025) 34%,
+      rgba(0, 168, 255, 0.075) 0%,
+      rgba(0, 168, 255, 0.025) 34%,
       transparent 68%
     );
   filter: blur(8px);
@@ -2497,9 +2494,9 @@ select:focus {
   height: 8px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #00e676;
+  background: #00a8ff;
   box-shadow:
-    0 0 12px rgba(0, 230, 118, 0.6);
+    0 0 12px rgba(0, 168, 255, 0.6);
 }
 
 .toast-success {
@@ -2580,7 +2577,7 @@ select:focus {
     );
   box-shadow:
     0 32px 90px rgba(0, 0, 0, 0.55),
-    0 0 40px rgba(0, 230, 118, 0.025);
+    0 0 40px rgba(0, 168, 255, 0.025);
   text-align: center;
   animation:
     modalCardIn
@@ -2768,7 +2765,7 @@ select:focus {
 
 .logoIcon {
   box-shadow:
-    0 0 24px rgba(0, 230, 118, 0.12);
+    0 0 24px rgba(0, 168, 255, 0.12);
   transition:
     transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 260ms ease;
@@ -2777,7 +2774,7 @@ select:focus {
 .logo:hover .logoIcon {
   transform: rotate(-3deg) scale(1.04);
   box-shadow:
-    0 0 30px rgba(0, 230, 118, 0.22);
+    0 0 30px rgba(0, 168, 255, 0.22);
 }
 
 @media (max-width: 700px) {
@@ -2813,8 +2810,68 @@ select:focus {
   }
 }
 
+
 /* =========================================================
-   BLUE CUSTOM CURSOR + SMOOTH TRAIL
+   SANTIONV BLUE BRAND — SEMANTIC STATUS COLORS
+   Brand/UI = blue, Success/Online = green,
+   Warning = yellow, Error/Ban = red, Admin = purple
+   ========================================================= */
+
+:root {
+  --snv-brand: #00a8ff;
+  --snv-brand-bright: #38bdf8;
+  --snv-brand-deep: #0066ff;
+  --snv-success: #00e676;
+  --snv-warning: #ffd740;
+  --snv-danger: #ff5656;
+  --snv-admin: #a970ff;
+}
+
+/* Online / success stays green */
+.serverDot,
+.statusDot:not(.statusDotOffline),
+.onlineBadge span {
+  background: var(--snv-success) !important;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.55) !important;
+}
+
+.onlineBadge,
+.consoleLevelBadge.success {
+  color: var(--snv-success) !important;
+}
+
+/* Warning stays yellow */
+.consoleLevelBadge.warning {
+  color: var(--snv-warning) !important;
+}
+
+/* Errors / bans stay red */
+.consoleLevelBadge.error,
+.consoleLevelBadge.ban {
+  color: var(--snv-danger) !important;
+}
+
+/* Admin semantic color */
+.consoleLevelBadge.admin {
+  color: var(--snv-admin) !important;
+}
+
+/* Brand-facing interactive elements use blue */
+.logoIcon,
+.navItem.active,
+.smallButton:hover:not(:disabled),
+.adminSaveButton:hover:not(:disabled) {
+  border-color: rgba(0, 168, 255, 0.55);
+}
+
+input:focus,
+select:focus {
+  border-color: var(--snv-brand) !important;
+  box-shadow: 0 0 0 3px rgba(0, 168, 255, 0.08);
+}
+
+/* =========================================================
+   SANTIONV BLUE CURSOR + CONTINUOUS NEON LINE TRAIL
    ========================================================= */
 
 @media (pointer: fine) {
@@ -2844,62 +2901,25 @@ select:focus {
     transform: translate(-50%, -50%);
   }
 
-  .cursorTrailLayer {
+  .cursorTrailCanvas {
     position: fixed;
     z-index: 99998;
     inset: 0;
+    width: 100vw;
+    height: 100vh;
     pointer-events: none;
-    overflow: hidden;
-  }
-
-  .cursorTrailPoint {
-    position: fixed;
-    width: 8px;
-    height: 8px;
-    pointer-events: none;
-    border-radius: 50%;
-    background: #008cff;
-    box-shadow:
-      0 0 8px rgba(0, 140, 255, 0.78),
-      0 0 18px rgba(0, 102, 255, 0.34);
-    animation:
-      blueTrailFade
-      420ms
-      cubic-bezier(0.22, 1, 0.36, 1)
-      forwards;
-  }
-
-  @keyframes blueTrailFade {
-    0% {
-      filter: blur(0);
-    }
-
-    55% {
-      filter: blur(1px);
-    }
-
-    100% {
-      opacity: 0 !important;
-      filter: blur(3px);
-    }
-  }
-
-  button:hover ~ .customCursor {
-    transform:
-      translate(-50%, -50%)
-      scale(1.25);
   }
 }
 
 @media (pointer: coarse) {
   .customCursor,
-  .cursorTrailLayer {
+  .cursorTrailCanvas {
     display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cursorTrailLayer {
+  .cursorTrailCanvas {
     display: none;
   }
 }
