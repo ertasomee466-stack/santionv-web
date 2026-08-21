@@ -316,6 +316,12 @@ export default function Home() {
   const [authLoading, setAuthLoading] =
     useState(true);
 
+
+  const [
+    logoutModalOpen,
+    setLogoutModalOpen,
+  ] = useState(false);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -5235,13 +5241,7 @@ export default function Home() {
               <button
                 className="discordProfileCard"
                 onClick={() => {
-                  if (
-                    window.confirm(
-                      "Discord hesabından çıkış yapılsın mı?"
-                    )
-                  ) {
-                    void logout();
-                  }
+                  setLogoutModalOpen(true);
                 }}
                 title="Çıkış yapmak için tıkla"
               >
@@ -5328,6 +5328,61 @@ export default function Home() {
           >
             ×
           </button>
+        </div>
+      )}
+
+      {logoutModalOpen && (
+        <div
+          className="logoutModalBackdrop"
+          onMouseDown={(event) => {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              setLogoutModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="logoutModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="logout-modal-title"
+          >
+            <div className="logoutModalIcon">
+              ↪
+            </div>
+
+            <h2 id="logout-modal-title">
+              Çıkış yapılsın mı?
+            </h2>
+
+            <p>
+              Discord oturumun kapatılacak ve
+              SantionV panelinden çıkış yapılacak.
+            </p>
+
+            <div className="logoutModalActions">
+              <button
+                className="logoutCancelButton"
+                onClick={() =>
+                  setLogoutModalOpen(false)
+                }
+              >
+                İPTAL
+              </button>
+
+              <button
+                className="logoutConfirmButton"
+                onClick={() => {
+                  setLogoutModalOpen(false);
+                  void logout();
+                }}
+              >
+                ÇIKIŞ
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
