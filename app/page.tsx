@@ -1155,7 +1155,7 @@ export default function Home() {
         frame
       );
     };
-  }, []);
+  }, [authLoading, authUser]);
 
   /* ======================================================
      FILTERS
