@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -5219,54 +5216,6 @@ export default function Home() {
             >
               ↻
             </button>
-
-            {!authLoading && authUser && (
-              <>
-                <span className="topDivider" />
-
-                <button
-                  className="discordUserChip"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Discord hesabından çıkış yapılsın mı?"
-                      )
-                    ) {
-                      void logout();
-                    }
-                  }}
-                  title="Çıkış yapmak için tıkla"
-                >
-                  {authUser.avatar ? (
-                    <img
-                      src={authUser.avatar}
-                      alt={authUser.displayName}
-                      className="discordUserAvatar"
-                    />
-                  ) : (
-                    <span className="discordUserAvatarFallback">
-                      {(
-                        authUser.displayName ||
-                        authUser.username
-                      )
-                        .slice(0, 1)
-                        .toUpperCase()}
-                    </span>
-                  )}
-
-                  <span className="discordUserText">
-                    <strong>
-                      {authUser.displayName ||
-                        authUser.username}
-                    </strong>
-
-                    <small>
-                      {authUser.role.toUpperCase()}
-                    </small>
-                  </span>
-                </button>
-              </>
-            )}
           </div>
         </header>
 
@@ -5281,18 +5230,64 @@ export default function Home() {
             </h1>
           </div>
 
-          <div
-            className={
-              serverOnline
-                ? "onlineBadge"
-                : "onlineBadge offlineBadge"
-            }
-          >
-            <span />
+          <div className="pageHeaderActions">
+            {!authLoading && authUser && (
+              <button
+                className="discordProfileCard"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Discord hesabından çıkış yapılsın mı?"
+                    )
+                  ) {
+                    void logout();
+                  }
+                }}
+                title="Çıkış yapmak için tıkla"
+              >
+                {authUser.avatar ? (
+                  <img
+                    src={authUser.avatar}
+                    alt={authUser.displayName}
+                    className="discordProfileAvatar"
+                  />
+                ) : (
+                  <span className="discordProfileAvatar discordProfileAvatarFallback">
+                    {(
+                      authUser.displayName ||
+                      authUser.username
+                    )
+                      .slice(0, 1)
+                      .toUpperCase()}
+                  </span>
+                )}
 
-            {serverOnline
-              ? "LIVE"
-              : "OFFLINE"}
+                <span className="discordProfileText">
+                  <strong>
+                    {authUser.displayName ||
+                      authUser.username}
+                  </strong>
+
+                  <small>
+                    {authUser.role.toUpperCase()}
+                  </small>
+                </span>
+              </button>
+            )}
+
+            <div
+              className={
+                serverOnline
+                  ? "onlineBadge"
+                  : "onlineBadge offlineBadge"
+              }
+            >
+              <span />
+
+              {serverOnline
+                ? "LIVE"
+                : "OFFLINE"}
+            </div>
           </div>
         </div>
 

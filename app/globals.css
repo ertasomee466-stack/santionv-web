@@ -3509,3 +3509,159 @@ select:focus {
     display: none;
   }
 }
+
+
+/* =========================================================
+   DISCORD PROFILE CARD — FINAL HEADER LAYOUT
+   PP + NAME + ROLE in one separate box, status stays separate
+   ========================================================= */
+
+.pageHeaderActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.discordProfileCard {
+  min-width: 210px;
+  height: 54px;
+  padding: 6px 14px 6px 7px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid rgba(0, 168, 255, 0.52);
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 19, 25, 0.98),
+      rgba(6, 13, 18, 0.98)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    0 0 0 1px rgba(0, 168, 255, 0.025),
+    0 8px 24px rgba(0, 0, 0, 0.18);
+  color: #eef7fc;
+  text-align: left;
+  overflow: hidden;
+  transform: none !important;
+}
+
+.discordProfileCard:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(56, 189, 248, 0.82);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 24, 32, 0.99),
+      rgba(7, 16, 22, 0.99)
+    );
+  box-shadow:
+    0 0 22px rgba(0, 168, 255, 0.10),
+    0 10px 28px rgba(0, 0, 0, 0.24);
+}
+
+.discordProfileAvatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: block;
+  border: 1px solid #345263;
+  border-radius: 50%;
+  background: #0b151b;
+  object-fit: cover;
+  box-shadow:
+    0 0 0 2px rgba(0, 168, 255, 0.035),
+    0 0 14px rgba(0, 168, 255, 0.07);
+}
+
+.discordProfileAvatarFallback {
+  display: grid;
+  place-items: center;
+  color: #38bdf8;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.discordProfileText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.discordProfileText strong {
+  max-width: 145px;
+  overflow: hidden;
+  color: #f4f9fc;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.discordProfileText small {
+  color: #00a8ff;
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+/* Status remains a separate box next to profile */
+.pageHeaderActions .onlineBadge {
+  flex: 0 0 auto;
+  min-width: 78px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0;
+}
+
+@media (max-width: 850px) {
+  .pageHeader {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .pageHeaderActions {
+    gap: 8px;
+  }
+
+  .discordProfileCard {
+    min-width: 0;
+    width: 52px;
+    padding: 6px;
+  }
+
+  .discordProfileText {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .pageHeader {
+    flex-direction: column;
+  }
+
+  .pageHeaderActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .discordProfileCard {
+    width: auto;
+    min-width: 180px;
+    padding-right: 12px;
+  }
+
+  .discordProfileText {
+    display: flex;
+  }
+}
