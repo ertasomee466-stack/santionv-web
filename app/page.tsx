@@ -833,33 +833,44 @@ export default function Home() {
   }
 
   useEffect(() => {
-    loadAuthUser();
-    loadEverything();
+    void loadAuthUser();
+  }, []);
+
+  useEffect(() => {
+    if (authLoading || !authUser) {
+      return;
+    }
+
+    void loadEverything();
 
     const interval =
       window.setInterval(() => {
-        loadPlayers();
+        void loadPlayers();
       }, 3000);
 
     return () => {
       window.clearInterval(interval);
     };
-  }, []);
+  }, [authLoading, authUser]);
 
   useEffect(() => {
-    if (!liveLogsEnabled) {
+    if (
+      authLoading ||
+      !authUser ||
+      !liveLogsEnabled
+    ) {
       return;
     }
 
     const interval =
       window.setInterval(() => {
-        loadLogs(true);
+        void loadLogs(true);
       }, 3000);
 
     return () => {
       window.clearInterval(interval);
     };
-  }, [liveLogsEnabled]);
+  }, [authLoading, authUser, liveLogsEnabled]);
 
   useEffect(() => {
     const panel =
@@ -5098,6 +5109,87 @@ export default function Home() {
       default:
         return renderDashboard();
     }
+  }
+
+  /* ======================================================
+     AUTH GATE
+     ====================================================== */
+
+  if (authLoading) {
+    return (
+      <main className="authScreen">
+        <section className="authLoadingCard">
+          <div className="authBrandIcon">S</div>
+          <span className="authLoadingSpinner" />
+          <p>OTURUM KONTROL EDİLİYOR</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!authUser) {
+    return (
+      <main className="authScreen">
+        <div className="authGrid" />
+        <div className="authAmbient authAmbientOne" />
+        <div className="authAmbient authAmbientTwo" />
+
+        <section className="authCard">
+          <div className="authBrand">
+            <div className="authBrandIcon">S</div>
+            <div>
+              <strong>SantionV</strong>
+              <span>ROBLOX ADMINISTRATION</span>
+            </div>
+          </div>
+
+          <div className="authCardContent">
+            <p className="authEyebrow">SECURE ACCESS</p>
+            <h1>Yönetim Paneline Giriş</h1>
+            <p className="authDescription">
+              SantionV yönetim paneline erişmek için hesabınla güvenli şekilde giriş yap.
+            </p>
+
+            <div className="authLoginButtons">
+              <a className="authLoginButton authDiscordButton" href="/api/auth/discord">
+                <span className="authProviderIcon">D</span>
+                <span>
+                  <strong>Discord ile Giriş Yap</strong>
+                  <small>Discord hesabınla devam et</small>
+                </span>
+                <b>→</b>
+              </a>
+
+              <button
+                className="authLoginButton authGoogleButton"
+                type="button"
+                disabled
+                title="Google girişi yakında eklenecek"
+              >
+                <span className="authProviderIcon">G</span>
+                <span>
+                  <strong>Google ile Giriş Yap</strong>
+                  <small>Yakında kullanılabilir</small>
+                </span>
+                <b>→</b>
+              </button>
+            </div>
+
+            <div className="authRegisterNote">
+              <span>Hesabın yok mu?</span>
+              <strong>İlk girişte hesabın otomatik oluşturulur.</strong>
+            </div>
+          </div>
+
+          <footer className="authFooter">
+            <span className="authSecureDot" />
+            SECURE OAUTH LOGIN
+            <i />
+            SANTIONV CONTROL SYSTEM
+          </footer>
+        </section>
+      </main>
+    );
   }
 
   /* ======================================================
