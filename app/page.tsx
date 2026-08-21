@@ -288,11 +288,19 @@ function formatDate(timestamp: number) {
 }
 
 type AuthUser = {
-  discordId: string;
+  accountId: string;
+  provider:
+    | "discord"
+    | "google"
+    | "password";
+  email: string | null;
   username: string;
   displayName: string;
   avatar: string | null;
-  role: "owner" | "admin";
+  role:
+    | "owner"
+    | "admin"
+    | "member";
   permissions: string[];
 };
 
@@ -320,6 +328,39 @@ export default function Home() {
   const [
     logoutModalOpen,
     setLogoutModalOpen,
+  ] = useState(false);
+
+
+  const [
+    authMode,
+    setAuthMode,
+  ] = useState<
+    "login" | "register"
+  >("login");
+
+  const [
+    authDisplayName,
+    setAuthDisplayName,
+  ] = useState("");
+
+  const [
+    authEmail,
+    setAuthEmail,
+  ] = useState("");
+
+  const [
+    authPassword,
+    setAuthPassword,
+  ] = useState("");
+
+  const [
+    authFormError,
+    setAuthFormError,
+  ] = useState("");
+
+  const [
+    authSubmitting,
+    setAuthSubmitting,
   ] = useState(false);
 
   const [loading, setLoading] =
@@ -597,6 +638,74 @@ export default function Home() {
       );
     } finally {
       window.location.href = "/";
+    }
+  }
+
+  async function submitAuthForm(
+    event:
+      React.FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    setAuthFormError("");
+    setAuthSubmitting(true);
+
+    try {
+      const response =
+        await fetch(
+          authMode === "login"
+            ? "/api/auth/login"
+            : "/api/auth/register",
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                displayName:
+                  authDisplayName,
+
+                email:
+                  authEmail,
+
+                password:
+                  authPassword,
+              }),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !data?.success
+      ) {
+        setAuthFormError(
+          data?.message ||
+          "İşlem başarısız."
+        );
+
+        return;
+      }
+
+      setAuthPassword("");
+      setActivePage(
+        "Dashboard"
+      );
+
+      await loadAuthUser();
+    } catch {
+      setAuthFormError(
+        "Sunucuya bağlanılamadı."
+      );
+    } finally {
+      setAuthSubmitting(false);
     }
   }
 
@@ -1160,6 +1269,83 @@ export default function Home() {
   /* ======================================================
      FILTERS
      ====================================================== */
+
+  const pagePermission: Record<
+    string,
+    string
+  > = {
+    Dashboard:
+      "dashboard",
+
+    Configuration:
+      "config",
+
+    Players:
+      "players",
+
+    "Live Monitor":
+      "players",
+
+    "Interactive Map":
+      "map",
+
+    Console:
+      "commands",
+
+    Lookup:
+      "lookup",
+
+    Vehicles:
+      "vehicles",
+
+    Bans:
+      "bans",
+
+    Admins:
+      "admins",
+  };
+
+  const visiblePages =
+    useMemo(() => {
+      if (!authUser) {
+        return [];
+      }
+
+      if (
+        authUser.role ===
+        "owner"
+      ) {
+        return pages;
+      }
+
+      return pages.filter(
+        (page) =>
+          authUser.permissions.includes(
+            pagePermission[
+              page
+            ]
+          )
+      );
+    }, [authUser]);
+
+  useEffect(() => {
+    if (
+      authUser &&
+      visiblePages.length >
+        0 &&
+      !visiblePages.includes(
+        activePage
+      )
+    ) {
+      setActivePage(
+        visiblePages[0]
+      );
+    }
+  }, [
+    authUser,
+    visiblePages,
+    activePage,
+  ]);
 
   const filteredPlayers =
     useMemo(() => {
@@ -5172,40 +5358,191 @@ export default function Home() {
           </div>
 
           <div className="authCardContent">
-            <p className="authEyebrow">SECURE ACCESS</p>
-            <h1>Yönetim Paneline Giriş</h1>
-            <p className="authDescription">
-              SantionV yönetim paneline erişmek için hesabınla güvenli şekilde giriş yap.
+            <p className="authEyebrow">
+              SECURE ACCESS
             </p>
 
-            <div className="authLoginButtons">
-              <a className="authLoginButton authDiscordButton" href="/api/auth/discord">
-                <span className="authProviderIcon">D</span>
+            <h1>
+              {authMode === "login"
+                ? "Yönetim Paneline Giriş"
+                : "SantionV Hesabı Oluştur"}
+            </h1>
+
+            <p className="authDescription">
+              {authMode === "login"
+                ? "E-posta ve şifrenle giriş yap veya Discord / Google hesabınla devam et."
+                : "Adını, e-posta adresini ve şifreni girerek hesabını oluştur."}
+            </p>
+
+            <form
+              className="authCredentialsForm"
+              onSubmit={
+                submitAuthForm
+              }
+            >
+              {authMode ===
+                "register" && (
+                <label className="authField">
+                  <span>
+                    AD / KULLANICI ADI
+                  </span>
+
+                  <input
+                    value={
+                      authDisplayName
+                    }
+                    onChange={(event) =>
+                      setAuthDisplayName(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Örn. Ömer"
+                    autoComplete="name"
+                    required
+                  />
+                </label>
+              )}
+
+              <label className="authField">
                 <span>
-                  <strong>Discord ile Giriş Yap</strong>
-                  <small>Discord hesabınla devam et</small>
+                  E-POSTA
                 </span>
+
+                <input
+                  type="email"
+                  value={
+                    authEmail
+                  }
+                  onChange={(event) =>
+                    setAuthEmail(
+                      event.target.value
+                    )
+                  }
+                  placeholder="ornek@gmail.com"
+                  autoComplete="email"
+                  required
+                />
+              </label>
+
+              <label className="authField">
+                <span>
+                  ŞİFRE
+                </span>
+
+                <input
+                  type="password"
+                  value={
+                    authPassword
+                  }
+                  onChange={(event) =>
+                    setAuthPassword(
+                      event.target.value
+                    )
+                  }
+                  placeholder="En az 8 karakter"
+                  autoComplete={
+                    authMode === "login"
+                      ? "current-password"
+                      : "new-password"
+                  }
+                  minLength={8}
+                  required
+                />
+              </label>
+
+              {authFormError && (
+                <div className="authFormError">
+                  {authFormError}
+                </div>
+              )}
+
+              <button
+                className="authPrimaryButton"
+                type="submit"
+                disabled={
+                  authSubmitting
+                }
+              >
+                {authSubmitting
+                  ? "BEKLEYİN..."
+                  : authMode === "login"
+                    ? "GİRİŞ YAP"
+                    : "HESAP OLUŞTUR"}
+              </button>
+            </form>
+
+            <div className="authDivider">
+              <span />
+              <b>VEYA</b>
+              <span />
+            </div>
+
+            <div className="authLoginButtons">
+              <a
+                className="authLoginButton authDiscordButton"
+                href="/api/auth/discord"
+              >
+                <span className="authProviderIcon">
+                  D
+                </span>
+
+                <span>
+                  <strong>
+                    Discord ile Giriş Yap
+                  </strong>
+                  <small>
+                    Discord hesabınla devam et
+                  </small>
+                </span>
+
                 <b>→</b>
               </a>
 
-              <button
+              <a
                 className="authLoginButton authGoogleButton"
-                type="button"
-                disabled
-                title="Google girişi yakında eklenecek"
+                href="/api/auth/google"
               >
-                <span className="authProviderIcon">G</span>
-                <span>
-                  <strong>Google ile Giriş Yap</strong>
-                  <small>Yakında kullanılabilir</small>
+                <span className="authProviderIcon authGoogleIcon">
+                  G
                 </span>
+
+                <span>
+                  <strong>
+                    Google ile Giriş Yap
+                  </strong>
+                  <small>
+                    Google hesabınla devam et
+                  </small>
+                </span>
+
                 <b>→</b>
-              </button>
+              </a>
             </div>
 
             <div className="authRegisterNote">
-              <span>Hesabın yok mu?</span>
-              <strong>İlk girişte hesabın otomatik oluşturulur.</strong>
+              <span>
+                {authMode === "login"
+                  ? "Hesabın yok mu?"
+                  : "Zaten hesabın var mı?"}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode(
+                    authMode === "login"
+                      ? "register"
+                      : "login"
+                  );
+
+                  setAuthFormError("");
+                  setAuthPassword("");
+                }}
+              >
+                {authMode === "login"
+                  ? "Hesap oluştur"
+                  : "Giriş yap"}
+              </button>
             </div>
           </div>
 
@@ -5273,7 +5610,7 @@ export default function Home() {
             PANEL
           </p>
 
-          {pages.map((page) => (
+          {visiblePages.map((page) => (
             <button
               key={page}
               className={
