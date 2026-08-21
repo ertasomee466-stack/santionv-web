@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-/* =========================================================
-   SANTIONV DISCORD OAUTH CALLBACK
-   ========================================================= */
-
-const SESSION_COOKIE =
-  "santionv_session";
-
-const STATE_COOKIE =
-  "santionv_discord_oauth_state";
-
-const SESSION_DURATION =
-  60 * 60 * 12; // 12 saat
+const SESSION_COOKIE = "santionv_session";
+const STATE_COOKIE = "santionv_discord_oauth_state";
+const SESSION_DURATION = 60 * 60 * 12;
 
 type DiscordUser = {
   id: string;
@@ -22,395 +13,201 @@ type DiscordUser = {
 };
 
 type DiscordMember = {
-  roles: string[];
+  roles?: string[];
   nick?: string | null;
 };
 
-/* =========================================================
-   ENV
-   ========================================================= */
+type SessionRole = "owner" | "admin";
 
-function getEnv(name: string) {
-  const value =
-    process.env[name];
+function getEnv(name: string): string {
+  const value = process.env[name]?.trim();
 
   if (!value) {
-    throw new Error(
-      `Missing environment variable: ${name}`
-    );
+    throw new Error(`Missing environment variable: ${name}`);
   }
 
   return value;
 }
-
-/* =========================================================
-   SESSION TOKEN
-   ========================================================= */
 
 function createSessionToken(data: {
   discordId: string;
   username: string;
   displayName: string;
   avatar: string | null;
-
-  role: "owner" | "admin";
-
+  role: SessionRole;
   permissions: string[];
 }) {
-  const secret =
-    getEnv("AUTH_SECRET");
+  const secret = getEnv("AUTH_SECRET");
 
   const payload = {
     ...data,
-
-    expiresAt:
-      Date.now() +
-      SESSION_DURATION * 1000,
+    expiresAt: Date.now() + SESSION_DURATION * 1000,
   };
 
-  const encodedPayload =
-    Buffer.from(
-      JSON.stringify(payload)
-    ).toString("base64url");
+  const encodedPayload = Buffer.from(
+    JSON.stringify(payload)
+  ).toString("base64url");
 
-  const signature =
-    crypto
-      .createHmac(
-        "sha256",
-        secret
-      )
-      .update(encodedPayload)
-      .digest("base64url");
+  const signature = crypto
+    .createHmac("sha256", secret)
+    .update(encodedPayload)
+    .digest("base64url");
 
-  return (
-    encodedPayload +
-    "." +
-    signature
+  return `${encodedPayload}.${signature}`;
+}
+
+function getCookie(request: Request, name: string) {
+  const cookieHeader = request.headers.get("cookie") ?? "";
+
+  const item = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`));
+
+  if (!item) {
+    return null;
+  }
+
+  return decodeURIComponent(
+    item.substring(name.length + 1)
   );
 }
 
-/* =========================================================
-   CALLBACK
-   ========================================================= */
+function getAvatarUrl(user: DiscordUser): string | null {
+  if (!user.avatar) {
+    return null;
+  }
 
-export async function GET(
-  request: Request
-) {
+  return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`;
+}
+
+export async function GET(request: Request) {
   try {
-    const requestUrl =
-      new URL(request.url);
+    const requestUrl = new URL(request.url);
 
-    const code =
-      requestUrl.searchParams.get(
-        "code"
-      );
+    const code = requestUrl.searchParams.get("code");
+    const state = requestUrl.searchParams.get("state");
+    const discordError = requestUrl.searchParams.get("error");
 
-    const state =
-      requestUrl.searchParams.get(
-        "state"
-      );
-
-    const error =
-      requestUrl.searchParams.get(
-        "error"
-      );
-
-    if (error) {
-      console.error(
-        "[SantionV OAuth] Discord error:",
-        error
-      );
-
+    if (discordError) {
       return NextResponse.redirect(
-        new URL(
-          "/?auth=cancelled",
-          request.url
-        )
+        new URL("/?auth=cancelled", request.url)
       );
     }
 
-    if (
-      !code ||
-      !state
-    ) {
+    if (!code || !state) {
       return NextResponse.redirect(
-        new URL(
-          "/?auth=invalid",
-          request.url
-        )
+        new URL("/?auth=invalid", request.url)
       );
     }
 
-    /* =====================================================
-       STATE COOKIE KONTROL
-       ===================================================== */
+    const savedState = getCookie(request, STATE_COOKIE);
 
-    const cookieHeader =
-      request.headers.get(
-        "cookie"
-      ) ?? "";
-
-    const stateCookie =
-      cookieHeader
-        .split(";")
-        .map(
-          (item) =>
-            item.trim()
-        )
-        .find((item) =>
-          item.startsWith(
-            `${STATE_COOKIE}=`
-          )
-        )
-        ?.split("=")
-        .slice(1)
-        .join("=");
-
-    if (
-      !stateCookie ||
-      stateCookie !== state
-    ) {
-      console.error(
-        "[SantionV OAuth] Invalid state"
-      );
+    if (!savedState || savedState !== state) {
+      console.error("[SantionV OAuth] State mismatch");
 
       return NextResponse.redirect(
-        new URL(
-          "/?auth=state_error",
-          request.url
-        )
+        new URL("/?auth=state_error", request.url)
       );
     }
 
-    /* =====================================================
-       ENV
-       ===================================================== */
+    const clientId = getEnv("DISCORD_CLIENT_ID");
+    const clientSecret = getEnv("DISCORD_CLIENT_SECRET");
+    const redirectUri = getEnv("DISCORD_REDIRECT_URI");
+    const guildId = getEnv("DISCORD_GUILD_ID");
+    const ownerDiscordId = getEnv("DISCORD_OWNER_ID");
 
-    const clientId =
-      getEnv(
-        "DISCORD_CLIENT_ID"
-      );
-
-    const clientSecret =
-      getEnv(
-        "DISCORD_CLIENT_SECRET"
-      );
-
-    const redirectUri =
-      getEnv(
-        "DISCORD_REDIRECT_URI"
-      );
-
-    const guildId =
-      getEnv(
-        "DISCORD_GUILD_ID"
-      );
-
-    /* =====================================================
-       CODE -> ACCESS TOKEN
-       ===================================================== */
-
-    const tokenBody =
-      new URLSearchParams();
-
-    tokenBody.set(
-      "client_id",
-      clientId
+    const tokenResponse = await fetch(
+      "https://discord.com/api/oauth2/token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: "authorization_code",
+          code,
+          redirect_uri: redirectUri,
+        }),
+        cache: "no-store",
+      }
     );
-
-    tokenBody.set(
-      "client_secret",
-      clientSecret
-    );
-
-    tokenBody.set(
-      "grant_type",
-      "authorization_code"
-    );
-
-    tokenBody.set(
-      "code",
-      code
-    );
-
-    tokenBody.set(
-      "redirect_uri",
-      redirectUri
-    );
-
-    const tokenResponse =
-      await fetch(
-        "https://discord.com/api/oauth2/token",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/x-www-form-urlencoded",
-          },
-
-          body:
-            tokenBody.toString(),
-
-          cache: "no-store",
-        }
-      );
 
     if (!tokenResponse.ok) {
-      const tokenError =
-        await tokenResponse.text();
+      const text = await tokenResponse.text();
 
       console.error(
         "[SantionV OAuth] Token error:",
-        tokenError
+        tokenResponse.status,
+        text
       );
 
       return NextResponse.redirect(
-        new URL(
-          "/?auth=token_error",
-          request.url
-        )
+        new URL("/?auth=token_error", request.url)
       );
     }
 
-    const tokenData =
-      await tokenResponse.json();
-
-    const accessToken =
-      String(
-        tokenData.access_token ?? ""
-      );
+    const tokenData = await tokenResponse.json();
+    const accessToken = String(tokenData?.access_token ?? "");
 
     if (!accessToken) {
       return NextResponse.redirect(
-        new URL(
-          "/?auth=token_error",
-          request.url
-        )
+        new URL("/?auth=token_error", request.url)
       );
     }
 
-    /* =====================================================
-       DISCORD USER
-       ===================================================== */
-
-    const userResponse =
-      await fetch(
-        "https://discord.com/api/users/@me",
-        {
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
-
-          cache: "no-store",
-        }
-      );
+    const userResponse = await fetch(
+      "https://discord.com/api/users/@me",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+      }
+    );
 
     if (!userResponse.ok) {
       return NextResponse.redirect(
-        new URL(
-          "/?auth=user_error",
-          request.url
-        )
+        new URL("/?auth=user_error", request.url)
       );
     }
 
     const discordUser =
-      (await userResponse.json()) as
-        DiscordUser;
+      (await userResponse.json()) as DiscordUser;
 
-    /* =====================================================
-       SANTIONV SERVER MEMBER
-       ===================================================== */
-
-    const memberResponse =
-      await fetch(
-        `https://discord.com/api/users/@me/guilds/${guildId}/member`,
-        {
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
-
-          cache: "no-store",
-        }
-      );
+    const memberResponse = await fetch(
+      `https://discord.com/api/users/@me/guilds/${guildId}/member`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+      }
+    );
 
     if (!memberResponse.ok) {
-      console.log(
+      console.error(
         "[SantionV OAuth] User is not in SantionV server:",
-        discordUser.username
-      );
-
-      return NextResponse.redirect(
-        new URL(
-          "/?auth=not_member",
-          request.url
-        )
-      );
-    }
-
-    const member =
-      (await memberResponse.json()) as
-        DiscordMember;
-
-    /* =====================================================
-       OWNER / ADMIN YETKİSİ
-       ===================================================== */
-
-    const ownerDiscordId =
-      process.env
-        .DISCORD_OWNER_ID ??
-      "";
-
-    const adminRoleIds =
-      (
-        process.env
-          .DISCORD_ADMIN_ROLE_IDS ??
-        ""
-      )
-        .split(",")
-        .map(
-          (role) =>
-            role.trim()
-        )
-        .filter(Boolean);
-
-    const isOwner =
-      ownerDiscordId !== "" &&
-      discordUser.id ===
-        ownerDiscordId;
-
-    const isAdmin =
-      member.roles.some(
-        (roleId) =>
-          adminRoleIds.includes(
-            roleId
-          )
-      );
-
-    if (
-      !isOwner &&
-      !isAdmin
-    ) {
-      console.log(
-        "[SantionV OAuth] Permission denied:",
         discordUser.username,
         discordUser.id
       );
 
       return NextResponse.redirect(
-        new URL(
-          "/?auth=no_permission",
-          request.url
-        )
+        new URL("/?auth=not_member", request.url)
       );
     }
 
-    /* =====================================================
-       PERMISSIONS
-       ===================================================== */
+    const member =
+      (await memberResponse.json()) as DiscordMember;
+
+    const isOwner =
+      discordUser.id === ownerDiscordId;
+
+    const role: SessionRole =
+      isOwner ? "owner" : "admin";
 
     const ownerPermissions = [
       "dashboard",
@@ -428,120 +225,54 @@ export async function GET(
     const adminPermissions = [
       "dashboard",
       "players",
-      "commands",
       "map",
       "logs",
       "lookup",
     ];
 
-    const role:
-      | "owner"
-      | "admin" =
-      isOwner
-        ? "owner"
-        : "admin";
-
-    const permissions =
-      isOwner
-        ? ownerPermissions
-        : adminPermissions;
-
-    /* =====================================================
-       AVATAR
-       ===================================================== */
-
-    const avatar =
-      discordUser.avatar
-        ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
-        : null;
-
-    /* =====================================================
-       SESSION
-       ===================================================== */
-
-    const sessionToken =
-      createSessionToken({
-        discordId:
-          discordUser.id,
-
-        username:
-          discordUser.username,
-
-        displayName:
-          discordUser.global_name ??
-          discordUser.username,
-
-        avatar,
-
-        role,
-
-        permissions,
-      });
-
-    /* =====================================================
-       PANEL'E DÖN
-       ===================================================== */
-
-    const response =
-      NextResponse.redirect(
-        new URL(
-          "/?auth=success",
-          request.url
-        )
-      );
-
-    response.cookies.set({
-      name:
-        SESSION_COOKIE,
-
-      value:
-        sessionToken,
-
-      httpOnly:
-        true,
-
-      secure:
-        process.env.NODE_ENV ===
-        "production",
-
-      sameSite:
-        "lax",
-
-      path:
-        "/",
-
-      maxAge:
-        SESSION_DURATION,
+    const sessionToken = createSessionToken({
+      discordId: discordUser.id,
+      username: discordUser.username,
+      displayName:
+        member.nick ||
+        discordUser.global_name ||
+        discordUser.username,
+      avatar: getAvatarUrl(discordUser),
+      role,
+      permissions:
+        isOwner
+          ? ownerPermissions
+          : adminPermissions,
     });
 
-    /* OAuth state artık lazım değil */
+    const response = NextResponse.redirect(
+      new URL("/?auth=success", request.url)
+    );
 
     response.cookies.set({
-      name:
-        STATE_COOKIE,
-
-      value:
-        "",
-
-      httpOnly:
-        true,
-
+      name: SESSION_COOKIE,
+      value: sessionToken,
+      httpOnly: true,
       secure:
-        process.env.NODE_ENV ===
-        "production",
+        process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_DURATION,
+    });
 
-      sameSite:
-        "lax",
-
-      path:
-        "/",
-
-      maxAge:
-        0,
+    response.cookies.set({
+      name: STATE_COOKIE,
+      value: "",
+      httpOnly: true,
+      secure:
+        process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
     });
 
     console.log(
-      "[SantionV OAuth] LOGIN:",
+      "[SantionV OAuth] LOGIN SUCCESS",
       discordUser.username,
       discordUser.id,
       role
@@ -555,10 +286,7 @@ export async function GET(
     );
 
     return NextResponse.redirect(
-      new URL(
-        "/?auth=server_error",
-        request.url
-      )
+      new URL("/?auth=server_error", request.url)
     );
   }
 }
