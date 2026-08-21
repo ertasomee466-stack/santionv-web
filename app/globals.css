@@ -3845,3 +3845,68 @@ select:focus {
 .authLoadingCard{position:relative;z-index:2;width:220px;padding:26px;display:flex;flex-direction:column;align-items:center;gap:16px;border:1px solid #1c303c;border-radius:12px;background:rgba(7,12,16,.95);box-shadow:0 24px 80px rgba(0,0,0,.48)}.authLoadingSpinner{width:24px;height:24px;border:2px solid #1d303b;border-top-color:#00a8ff;border-radius:50%;animation:authSpin 700ms linear infinite}.authLoadingCard p{color:#60727e;font-size:7px;font-weight:850;letter-spacing:1.5px}
 @keyframes authSpin{to{transform:rotate(360deg)}}@keyframes authCardIn{from{opacity:0;transform:translateY(14px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:520px){.authScreen{padding:14px}.authCardContent{padding:26px 18px 22px}.authCardContent h1{font-size:21px}.authFooter{flex-wrap:wrap;padding:10px 14px}}
+
+
+/* =========================================================
+   LOGIN SCREEN MOUSE / CLICK FIX
+   Login ekranında normal mouse görünür ve tüm butonlar tıklanır.
+   Dashboard içindeki özel mavi cursor sistemi korunur.
+   ========================================================= */
+
+.authScreen,
+.authScreen * {
+  cursor: auto !important;
+}
+
+.authScreen a,
+.authScreen button:not(:disabled) {
+  cursor: pointer !important;
+}
+
+.authScreen button:disabled {
+  cursor: not-allowed !important;
+}
+
+.authScreen {
+  pointer-events: auto !important;
+}
+
+.authCard,
+.authCardContent,
+.authBrand,
+.authLoginButtons,
+.authLoginButton,
+.authDiscordButton,
+.authRegisterNote,
+.authFooter {
+  position: relative;
+  pointer-events: auto !important;
+}
+
+.authCard {
+  z-index: 20 !important;
+}
+
+.authGrid,
+.authAmbient,
+.authAmbientOne,
+.authAmbientTwo {
+  pointer-events: none !important;
+  user-select: none;
+}
+
+.authDiscordButton {
+  z-index: 25;
+}
+
+.authDiscordButton:active {
+  transform: translateY(0) scale(0.995);
+}
+
+/* Dashboard'ın özel cursor katmanları hiçbir tıklamayı engellemesin. */
+.customCursor,
+.cursorTrailCanvas,
+.cursorTrailLayer,
+.cursorTrailPoint {
+  pointer-events: none !important;
+}
