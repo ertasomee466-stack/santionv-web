@@ -833,7 +833,35 @@ export default function Home() {
   }
 
   useEffect(() => {
-    void loadAuthUser();
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const authResult =
+      params.get("auth");
+
+    if (authResult === "success") {
+      void loadAuthUser();
+
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname
+      );
+
+      return;
+    }
+
+    void fetch(
+      "/api/auth/logout",
+      {
+        method: "POST",
+      }
+    ).finally(() => {
+      setAuthUser(null);
+      setAuthLoading(false);
+    });
   }, []);
 
   useEffect(() => {
