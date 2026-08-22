@@ -29,22 +29,33 @@ function readCookie(
   request: Request,
   name: string
 ) {
-  const cookieHeader =
-    request.headers.get("cookie") ?? "";
+  const header =
+    request.headers.get(
+      "cookie"
+    ) ?? "";
 
-  const cookie = cookieHeader
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) =>
-      part.startsWith(`${name}=`)
-    );
+  const item =
+    header
+      .split(";")
+      .map(
+        (part) =>
+          part.trim()
+      )
+      .find(
+        (part) =>
+          part.startsWith(
+            `${name}=`
+          )
+      );
 
-  if (!cookie) {
+  if (!item) {
     return null;
   }
 
   return decodeURIComponent(
-    cookie.substring(name.length + 1)
+    item.slice(
+      name.length + 1
+    )
   );
 }
 
@@ -52,50 +63,20 @@ export async function GET(
   request: Request
 ) {
   try {
-    const requestUrl =
-      new URL(request.url);
+    const url =
+      new URL(
+        request.url
+      );
 
     const code =
-      requestUrl.searchParams.get(
+      url.searchParams.get(
         "code"
       );
 
     const state =
-      requestUrl.searchParams.get(
+      url.searchParams.get(
         "state"
       );
-
-    const googleError =
-      requestUrl.searchParams.get(
-        "error"
-      );
-
-    if (googleError) {
-      console.error(
-        "[SantionV Google] OAuth cancelled:",
-        googleError
-      );
-
-      return NextResponse.redirect(
-        new URL(
-          "/?auth=google_cancelled",
-          request.url
-        )
-      );
-    }
-
-    if (!code || !state) {
-      return NextResponse.redirect(
-        new URL(
-          "/?auth=google_invalid",
-          request.url
-        )
-      );
-    }
-
-    /* ======================================================
-       STATE CONTROL
-       ====================================================== */
 
     const savedState =
       readCookie(
@@ -104,13 +85,11 @@ export async function GET(
       );
 
     if (
+      !code ||
+      !state ||
       !savedState ||
-      savedState !== state
+      state !== savedState
     ) {
-      console.error(
-        "[SantionV Google] State mismatch"
-      );
-
       return NextResponse.redirect(
         new URL(
           "/?auth=google_state_error",
@@ -119,15 +98,12 @@ export async function GET(
       );
     }
 
-    /* ======================================================
-       GOOGLE AUTH CODE -> ACCESS TOKEN
-       ====================================================== */
-
     const tokenResponse =
       await fetch(
         "https://oauth2.googleapis.com/token",
         {
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
             "Content-Type":
@@ -157,18 +133,20 @@ export async function GET(
                 ),
             }),
 
-          cache: "no-store",
+          cache:
+            "no-store",
         }
       );
 
-    if (!tokenResponse.ok) {
-      const errorText =
+    if (
+      !tokenResponse.ok
+    ) {
+      const text =
         await tokenResponse.text();
 
       console.error(
-        "[SantionV Google] Token error:",
-        tokenResponse.status,
-        errorText
+        "[SantionV Google Token]",
+        text
       );
 
       return NextResponse.redirect(
@@ -184,21 +162,9 @@ export async function GET(
 
     const accessToken =
       String(
-        tokenData?.access_token ?? ""
+        tokenData?.access_token ??
+        ""
       );
-
-    if (!accessToken) {
-      return NextResponse.redirect(
-        new URL(
-          "/?auth=google_token_error",
-          request.url
-        )
-      );
-    }
-
-    /* ======================================================
-       GOOGLE USER INFO
-       ====================================================== */
 
     const userResponse =
       await fetch(
@@ -209,16 +175,14 @@ export async function GET(
               `Bearer ${accessToken}`,
           },
 
-          cache: "no-store",
+          cache:
+            "no-store",
         }
       );
 
-    if (!userResponse.ok) {
-      console.error(
-        "[SantionV Google] User request failed:",
-        userResponse.status
-      );
-
+    if (
+      !userResponse.ok
+    ) {
       return NextResponse.redirect(
         new URL(
           "/?auth=google_user_error",
@@ -231,9 +195,14 @@ export async function GET(
       (await userResponse.json()) as
         GoogleUser;
 
+    const email =
+      normalizeEmail(
+        googleUser.email
+      );
+
     if (
       !googleUser.sub ||
-      !googleUser.email
+      !email
     ) {
       return NextResponse.redirect(
         new URL(
@@ -242,15 +211,6 @@ export async function GET(
         )
       );
     }
-
-    const email =
-      normalizeEmail(
-        googleUser.email
-      );
-
-    /* ======================================================
-       FIND / CREATE ACCOUNT
-       ====================================================== */
 
     let user =
       await getUserByGoogleSub(
@@ -267,13 +227,25 @@ export async function GET(
     const now =
       Date.now();
 
+    const ownerEmail =
+      process.env.GOOGLE_OWNER_EMAIL
+        ?.trim()
+        .toLowerCase();
+
+    const googleRole =
+      ownerEmail &&
+      email === ownerEmail
+        ? "owner" as const
+        : "member" as const;
+
     if (!user) {
       const role =
-        "member" as const;
+        googleRole;
 
       user = {
         id:
-          crypto.randomUUID(),
+          crypto
+            .randomUUID(),
 
         email,
 
@@ -314,26 +286,32 @@ export async function GET(
         googleSub:
           googleUser.sub,
 
+        avatar:
+          googleUser.picture ??
+          user.avatar,
+
         displayName:
           googleUser.name ||
           user.displayName,
 
-        avatar:
-          googleUser.picture ??
-          user.avatar,
+        role:
+          googleRole,
+
+        permissions:
+          defaultPermissions(
+            googleRole
+          ),
 
         updatedAt:
           now,
       };
     }
 
-    await saveUser(user);
+    await saveUser(
+      user
+    );
 
-    /* ======================================================
-       SESSION COOKIE
-       ====================================================== */
-
-    const sessionToken =
+    const token =
       createSessionToken({
         accountId:
           user.id,
@@ -373,7 +351,7 @@ export async function GET(
         SESSION_COOKIE,
 
       value:
-        sessionToken,
+        token,
 
       httpOnly:
         true,
@@ -391,10 +369,6 @@ export async function GET(
       maxAge:
         SESSION_DURATION,
     });
-
-    /* ======================================================
-       CLEAR GOOGLE STATE COOKIE
-       ====================================================== */
 
     response.cookies.set({
       name:
@@ -419,20 +393,6 @@ export async function GET(
       maxAge:
         0,
     });
-
-    console.log(
-      "[SantionV Google] LOGIN SUCCESS",
-      {
-        email:
-          user.email,
-
-        displayName:
-          user.displayName,
-
-        role:
-          user.role,
-      }
-    );
 
     return response;
   } catch (error) {
