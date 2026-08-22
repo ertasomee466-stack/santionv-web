@@ -1,4 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
 
 import {
   createSessionToken,
@@ -14,144 +17,161 @@ import {
   type StoredUser,
 } from "../../_lib/auth";
 
+const STATE_COOKIE =
+  "santionv_google_oauth_state";
+
 type GoogleTokenResponse = {
   access_token?: string;
-  expires_in?: number;
-  scope?: string;
-  token_type?: string;
-  id_token?: string;
-  error?: string;
-  error_description?: string;
 };
 
 type GoogleUserInfo = {
   sub?: string;
   name?: string;
-  given_name?: string;
-  family_name?: string;
   picture?: string;
   email?: string;
-  email_verified?: boolean;
 };
 
-function redirectToHome(
-  request: NextRequest,
-  params?: Record<string, string>
+export async function GET(
+  request: NextRequest
 ) {
-  const url = new URL("/", request.url);
-
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      url.searchParams.set(key, value);
-    }
-  }
-
-  return NextResponse.redirect(url);
-}
-
-export async function GET(request: NextRequest) {
   try {
     const code =
-      request.nextUrl.searchParams.get("code");
+      request.nextUrl.searchParams.get(
+        "code"
+      );
+
+    const state =
+      request.nextUrl.searchParams.get(
+        "state"
+      );
 
     const oauthError =
-      request.nextUrl.searchParams.get("error");
+      request.nextUrl.searchParams.get(
+        "error"
+      );
 
     if (oauthError) {
-      return redirectToHome(request, {
-        auth_error: "google_denied",
-      });
+      return NextResponse.redirect(
+        new URL(
+          "/?auth=google_cancelled",
+          request.url
+        )
+      );
     }
 
-    if (!code) {
-      return redirectToHome(request, {
-        auth_error: "google_code_missing",
-      });
+    const savedState =
+      request.cookies.get(
+        STATE_COOKIE
+      )?.value;
+
+    if (
+      !code ||
+      !state ||
+      !savedState ||
+      state !== savedState
+    ) {
+      return NextResponse.redirect(
+        new URL(
+          "/?auth=google_state_error",
+          request.url
+        )
+      );
     }
 
-    const clientId =
-      getEnv("GOOGLE_CLIENT_ID");
+    /* ===============================
+       GOOGLE TOKEN
+       =============================== */
 
-    const clientSecret =
-      getEnv("GOOGLE_CLIENT_SECRET");
+    const tokenResponse =
+      await fetch(
+        "https://oauth2.googleapis.com/token",
+        {
+          method: "POST",
 
-    const redirectUri =
-      getEnv("GOOGLE_REDIRECT_URI");
+          headers: {
+            "Content-Type":
+              "application/x-www-form-urlencoded",
+          },
 
-    /*
-     * Google authorization code ->
-     * access token
-     */
-    const tokenResponse = await fetch(
-      "https://oauth2.googleapis.com/token",
-      {
-        method: "POST",
+          body:
+            new URLSearchParams({
+              code,
 
-        headers: {
-          "Content-Type":
-            "application/x-www-form-urlencoded",
-        },
+              client_id:
+                getEnv(
+                  "GOOGLE_CLIENT_ID"
+                ),
 
-        body: new URLSearchParams({
-          code,
-          client_id: clientId,
-          client_secret: clientSecret,
-          redirect_uri: redirectUri,
-          grant_type: "authorization_code",
-        }),
+              client_secret:
+                getEnv(
+                  "GOOGLE_CLIENT_SECRET"
+                ),
 
-        cache: "no-store",
-      }
-    );
+              redirect_uri:
+                getEnv(
+                  "GOOGLE_REDIRECT_URI"
+                ),
+
+              grant_type:
+                "authorization_code",
+            }),
+
+          cache: "no-store",
+        }
+      );
 
     const tokenData =
-      (await tokenResponse.json()) as GoogleTokenResponse;
+      (await tokenResponse.json()) as
+        GoogleTokenResponse;
 
     if (
       !tokenResponse.ok ||
       !tokenData.access_token
     ) {
       console.error(
-        "[Google OAuth Token Error]",
-        tokenData
+        "[Google OAuth] Token error"
       );
 
-      return redirectToHome(request, {
-        auth_error: "google_token_failed",
-      });
+      return NextResponse.redirect(
+        new URL(
+          "/?auth=google_token_error",
+          request.url
+        )
+      );
     }
 
-    /*
-     * Google account information
-     */
-    const userResponse = await fetch(
-      "https://openidconnect.googleapis.com/v1/userinfo",
-      {
-        headers: {
-          Authorization:
-            `Bearer ${tokenData.access_token}`,
-        },
+    /* ===============================
+       GOOGLE USER
+       =============================== */
 
-        cache: "no-store",
-      }
-    );
+    const userResponse =
+      await fetch(
+        "https://openidconnect.googleapis.com/v1/userinfo",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${tokenData.access_token}`,
+          },
+
+          cache: "no-store",
+        }
+      );
 
     const googleUser =
-      (await userResponse.json()) as GoogleUserInfo;
+      (await userResponse.json()) as
+        GoogleUserInfo;
 
     if (
       !userResponse.ok ||
       !googleUser.sub ||
       !googleUser.email
     ) {
-      console.error(
-        "[Google OAuth User Error]",
-        googleUser
+      return NextResponse.redirect(
+        new URL(
+          "/?auth=google_user_error",
+          request.url
+        )
       );
-
-      return redirectToHome(request, {
-        auth_error: "google_user_failed",
-      });
     }
 
     const email =
@@ -159,58 +179,42 @@ export async function GET(request: NextRequest) {
         googleUser.email
       );
 
-    /*
-     * Önce Google ID ile hesabı ara.
-     */
+    /* ===============================
+       ACCOUNT
+       =============================== */
+
     let existingUser =
       await getUserByGoogleSub(
         googleUser.sub
       );
 
-    /*
-     * Google ID bulunamazsa aynı e-posta ile
-     * daha önce açılmış hesabı kontrol et.
-     */
     if (!existingUser) {
       existingUser =
-        await getUserByEmail(email);
+        await getUserByEmail(
+          email
+        );
     }
 
-    /*
-     * OWNER kontrolü.
-     *
-     * GOOGLE_OWNER_EMAIL varsa onu kullanır.
-     * Yoksa DISCORD_OWNER_EMAIL varsa onu dener.
-     *
-     * İkisi de yoksa mevcut owner hesabının
-     * rolünü değiştirmez.
-     */
-    const configuredOwnerEmail =
-      process.env.GOOGLE_OWNER_EMAIL?.trim() ||
-      process.env.OWNER_EMAIL?.trim() ||
-      "";
-
-    const isConfiguredOwner =
-      configuredOwnerEmail
-        ? normalizeEmail(
-            configuredOwnerEmail
-          ) === email
-        : false;
+    const ownerEmail =
+      process.env
+        .GOOGLE_OWNER_EMAIL
+        ?.trim()
+        .toLowerCase();
 
     let role: AuthRole =
       existingUser?.role ??
       "member";
 
-    if (isConfiguredOwner) {
+    if (
+      ownerEmail &&
+      email === ownerEmail
+    ) {
       role = "owner";
     }
 
-    /*
-     * Mevcut owner hiçbir zaman yanlışlıkla
-     * member/admin yapılmaz.
-     */
     if (
-      existingUser?.role === "owner"
+      existingUser?.role ===
+      "owner"
     ) {
       role = "owner";
     }
@@ -218,28 +222,21 @@ export async function GET(request: NextRequest) {
     const now =
       Date.now();
 
-    const accountId =
-      existingUser?.id ??
-      `google:${googleUser.sub}`;
-
-    const username =
-      existingUser?.username ||
-      email.split("@")[0] ||
-      "google-user";
-
-    const displayName =
-      googleUser.name?.trim() ||
-      existingUser?.displayName ||
-      username;
-
     const user: StoredUser = {
-      id: accountId,
+      id:
+        existingUser?.id ??
+        `google:${googleUser.sub}`,
 
       email,
 
-      displayName,
+      displayName:
+        googleUser.name ||
+        existingUser?.displayName ||
+        email.split("@")[0],
 
-      username,
+      username:
+        existingUser?.username ||
+        email.split("@")[0],
 
       avatar:
         googleUser.picture ||
@@ -255,28 +252,30 @@ export async function GET(request: NextRequest) {
       discordId:
         existingUser?.discordId,
 
-      provider: "google",
+      provider:
+        "google",
 
       role,
 
       permissions:
-        defaultPermissions(role),
+        defaultPermissions(
+          role
+        ),
 
       createdAt:
         existingUser?.createdAt ??
         now,
 
-      updatedAt: now,
+      updatedAt:
+        now,
     };
 
-    /*
-     * Redis'e hesabı kaydet / güncelle.
-     */
     await saveUser(user);
 
-    /*
-     * Yeni session oluştur.
-     */
+    /* ===============================
+       SESSION
+       =============================== */
+
     const sessionToken =
       createSessionToken({
         accountId:
@@ -304,10 +303,17 @@ export async function GET(request: NextRequest) {
           user.permissions,
       });
 
+    /*
+      ÖNEMLİ:
+      page.tsx ?auth=success bekliyor.
+    */
     const response =
-      redirectToHome(request, {
-        auth_success: "google",
-      });
+      NextResponse.redirect(
+        new URL(
+          "/?auth=success",
+          request.url
+        )
+      );
 
     response.cookies.set({
       name:
@@ -333,6 +339,28 @@ export async function GET(request: NextRequest) {
         SESSION_DURATION,
     });
 
+    response.cookies.set({
+      name:
+        STATE_COOKIE,
+
+      value: "",
+
+      httpOnly:
+        true,
+
+      secure:
+        process.env.NODE_ENV ===
+        "production",
+
+      sameSite:
+        "lax",
+
+      path:
+        "/",
+
+      maxAge: 0,
+    });
+
     return response;
   } catch (error) {
     console.error(
@@ -340,8 +368,11 @@ export async function GET(request: NextRequest) {
       error
     );
 
-    return redirectToHome(request, {
-      auth_error: "google_callback_failed",
-    });
+    return NextResponse.redirect(
+      new URL(
+        "/?auth=google_server_error",
+        request.url
+      )
+    );
   }
 }
