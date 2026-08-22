@@ -4067,3 +4067,199 @@ select:focus {
 .authRegisterNote button:hover {
   text-decoration: underline;
 }
+
+
+/* =========================================================
+   WEB ACCOUNT MANAGEMENT
+   ========================================================= */
+
+.webAccountsPanel {
+  border-color:
+    rgba(0, 168, 255, 0.26);
+}
+
+.webAccountGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(290px, 1fr)
+    );
+  gap: 12px;
+}
+
+.webAccountCard {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #1c303b;
+  border-radius: 9px;
+  background:
+    linear-gradient(
+      180deg,
+      #091217,
+      #070d11
+    );
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.018);
+}
+
+.webAccountIdentity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.webAccountAvatar {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 1px solid #2b4b5c;
+  border-radius: 50%;
+  background: #09161d;
+  object-fit: cover;
+}
+
+.webAccountAvatarFallback {
+  display: grid;
+  place-items: center;
+  color: #38bdf8;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.webAccountIdentity > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.webAccountIdentity strong {
+  overflow: hidden;
+  color: #eff8fc;
+  font-size: 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.webAccountIdentity span {
+  overflow: hidden;
+  color: #637883;
+  font-size: 7px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.webAccountMeta {
+  margin-top: 13px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.webRoleBadge,
+.webProviderBadge {
+  min-height: 20px;
+  padding: 0 7px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 5px;
+  font-size: 6px;
+  font-weight: 950;
+  letter-spacing: 0.9px;
+}
+
+.webRoleBadge.owner {
+  border: 1px solid
+    rgba(0, 168, 255, 0.52);
+  background:
+    rgba(0, 168, 255, 0.10);
+  color: #38bdf8;
+}
+
+.webRoleBadge.admin {
+  border: 1px solid
+    rgba(51, 214, 159, 0.38);
+  background:
+    rgba(51, 214, 159, 0.07);
+  color: #55dda9;
+}
+
+.webRoleBadge.member {
+  border: 1px solid #34434c;
+  background: #0b1216;
+  color: #92a1aa;
+}
+
+.webProviderBadge {
+  border: 1px solid #273943;
+  background: #091116;
+  color: #617580;
+}
+
+.webAccountPermissions {
+  min-height: 46px;
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 5px;
+}
+
+.webAccountPermissions span {
+  padding: 4px 6px;
+  border: 1px solid #1e303a;
+  border-radius: 4px;
+  background: #081015;
+  color: #58707d;
+  font-size: 6px;
+  font-weight: 750;
+}
+
+.webAccountActions {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns:
+    1fr 1fr;
+  gap: 7px;
+}
+
+.webRoleButton,
+.webOwnerLocked {
+  height: 33px;
+  border-radius: 6px;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: 0.8px;
+}
+
+.webRoleButton {
+  border: 1px solid #2a3b44;
+  background: #091116;
+  color: #657984;
+}
+
+.webRoleButton:hover:not(:disabled) {
+  border-color:
+    rgba(0, 168, 255, 0.58);
+  color: #cfefff;
+}
+
+.webRoleButton.active {
+  border-color:
+    rgba(0, 168, 255, 0.62);
+  background:
+    rgba(0, 168, 255, 0.10);
+  color: #38bdf8;
+}
+
+.webOwnerLocked {
+  grid-column: 1 / -1;
+  border: 1px solid
+    rgba(0, 168, 255, 0.28);
+  background:
+    rgba(0, 168, 255, 0.045);
+  color: #4b819e;
+}

@@ -1,28 +1,28 @@
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 
 import {
   createSessionToken,
   defaultPermissions,
   getEnv,
-  getUserByEmail,
-  getUserByGoogleSub,
-  normalizeEmail,
+  getUserById,
   saveUser,
   SESSION_COOKIE,
   SESSION_DURATION,
   type StoredUser,
-} from "../../_lib/auth";
+} from "../_lib/auth";
 
 const STATE_COOKIE =
-  "santionv_google_oauth_state";
+  "santionv_discord_oauth_state";
 
-type GoogleUser = {
-  sub: string;
-  email: string;
-  email_verified?: boolean;
-  name?: string;
-  picture?: string;
+type DiscordUser = {
+  id: string;
+  username: string;
+  global_name?: string | null;
+  avatar?: string | null;
+};
+
+type DiscordMember = {
+  nick?: string | null;
 };
 
 function readCookie(
@@ -92,7 +92,7 @@ export async function GET(
     ) {
       return NextResponse.redirect(
         new URL(
-          "/?auth=google_state_error",
+          "/?auth=state_error",
           request.url
         )
       );
@@ -100,7 +100,7 @@ export async function GET(
 
     const tokenResponse =
       await fetch(
-        "https://oauth2.googleapis.com/token",
+        "https://discord.com/api/oauth2/token",
         {
           method:
             "POST",
@@ -114,22 +114,22 @@ export async function GET(
             new URLSearchParams({
               client_id:
                 getEnv(
-                  "GOOGLE_CLIENT_ID"
+                  "DISCORD_CLIENT_ID"
                 ),
 
               client_secret:
                 getEnv(
-                  "GOOGLE_CLIENT_SECRET"
+                  "DISCORD_CLIENT_SECRET"
                 ),
-
-              code,
 
               grant_type:
                 "authorization_code",
 
+              code,
+
               redirect_uri:
                 getEnv(
-                  "GOOGLE_REDIRECT_URI"
+                  "DISCORD_REDIRECT_URI"
                 ),
             }),
 
@@ -141,17 +141,9 @@ export async function GET(
     if (
       !tokenResponse.ok
     ) {
-      const text =
-        await tokenResponse.text();
-
-      console.error(
-        "[SantionV Google Token]",
-        text
-      );
-
       return NextResponse.redirect(
         new URL(
-          "/?auth=google_token_error",
+          "/?auth=token_error",
           request.url
         )
       );
@@ -168,7 +160,7 @@ export async function GET(
 
     const userResponse =
       await fetch(
-        "https://openidconnect.googleapis.com/v1/userinfo",
+        "https://discord.com/api/users/@me",
         {
           headers: {
             Authorization:
@@ -185,157 +177,141 @@ export async function GET(
     ) {
       return NextResponse.redirect(
         new URL(
-          "/?auth=google_user_error",
+          "/?auth=user_error",
           request.url
         )
       );
     }
 
-    const googleUser =
+    const discordUser =
       (await userResponse.json()) as
-        GoogleUser;
+        DiscordUser;
 
-    const email =
-      normalizeEmail(
-        googleUser.email
+    const memberResponse =
+      await fetch(
+        `https://discord.com/api/users/@me/guilds/${getEnv(
+          "DISCORD_GUILD_ID"
+        )}/member`,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+
+          cache:
+            "no-store",
+        }
       );
 
     if (
-      !googleUser.sub ||
-      !email
+      !memberResponse.ok
     ) {
       return NextResponse.redirect(
         new URL(
-          "/?auth=google_user_error",
+          "/?auth=not_member",
           request.url
         )
       );
     }
 
-    let user =
-      await getUserByGoogleSub(
-        googleUser.sub
+    const member =
+      (await memberResponse.json()) as
+        DiscordMember;
+
+    const isOwner =
+      discordUser.id ===
+      getEnv(
+        "DISCORD_OWNER_ID"
       );
 
-    if (!user) {
-      user =
-        await getUserByEmail(
-          email
-        );
-    }
+    const accountId =
+      `discord:${discordUser.id}`;
+
+    const existing =
+      await getUserById(
+        accountId
+      );
+
+    const role =
+      isOwner
+        ? "owner" as const
+        : existing?.role ??
+          "member" as const;
+
+    const avatar =
+      discordUser.avatar
+        ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=128`
+        : null;
 
     const now =
       Date.now();
 
-    const ownerEmail =
-      process.env.GOOGLE_OWNER_EMAIL
-        ?.trim()
-        .toLowerCase();
+    const storedUser: StoredUser = {
+      id:
+        accountId,
 
-    const googleRole =
-      ownerEmail &&
-      email === ownerEmail
-        ? "owner" as const
-        : "member" as const;
+      email:
+        null,
 
-    if (!user) {
-      const role =
-        googleRole;
+      username:
+        discordUser.username,
 
-      user = {
-        id:
-          crypto
-            .randomUUID(),
+      displayName:
+        member.nick ||
+        discordUser.global_name ||
+        discordUser.username,
 
-        email,
+      avatar,
 
-        displayName:
-          googleUser.name ||
-          email.split("@")[0],
+      discordId:
+        discordUser.id,
 
-        username:
-          email.split("@")[0],
+      provider:
+        "discord",
 
-        avatar:
-          googleUser.picture ??
-          null,
+      role,
 
-        googleSub:
-          googleUser.sub,
+      permissions:
+        defaultPermissions(
+          role
+        ),
 
-        provider:
-          "google",
+      createdAt:
+        existing?.createdAt ??
+        now,
 
-        role,
-
-        permissions:
-          defaultPermissions(
-            role
-          ),
-
-        createdAt:
-          now,
-
-        updatedAt:
-          now,
-      } satisfies StoredUser;
-    } else {
-      user = {
-        ...user,
-
-        googleSub:
-          googleUser.sub,
-
-        avatar:
-          googleUser.picture ??
-          user.avatar,
-
-        displayName:
-          googleUser.name ||
-          user.displayName,
-
-        role:
-          googleRole,
-
-        permissions:
-          defaultPermissions(
-            googleRole
-          ),
-
-        updatedAt:
-          now,
-      };
-    }
+      updatedAt:
+        now,
+    };
 
     await saveUser(
-      user
+      storedUser
     );
 
     const token =
       createSessionToken({
-        accountId:
-          user.id,
+        accountId,
 
         provider:
-          "google",
+          "discord",
 
         email:
-          user.email,
+          null,
 
         username:
-          user.username,
+          storedUser.username,
 
         displayName:
-          user.displayName,
+          storedUser.displayName,
 
         avatar:
-          user.avatar,
+          storedUser.avatar,
 
         role:
-          user.role,
+          storedUser.role,
 
         permissions:
-          user.permissions,
+          storedUser.permissions,
       });
 
     const response =
@@ -397,13 +373,13 @@ export async function GET(
     return response;
   } catch (error) {
     console.error(
-      "[SantionV Google Callback]",
+      "[SantionV Discord Callback]",
       error
     );
 
     return NextResponse.redirect(
       new URL(
-        "/?auth=google_server_error",
+        "/?auth=server_error",
         request.url
       )
     );

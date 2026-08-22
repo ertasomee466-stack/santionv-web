@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 import {
+  getUserById,
   SESSION_COOKIE,
   verifySessionToken,
 } from "../_lib/auth";
@@ -62,6 +63,64 @@ export async function GET() {
       return response;
     }
 
+    const stored =
+      await getUserById(
+        session.accountId
+      );
+
+    const current =
+      stored
+        ? {
+            accountId:
+              stored.id,
+
+            provider:
+              stored.provider,
+
+            email:
+              stored.email,
+
+            username:
+              stored.username,
+
+            displayName:
+              stored.displayName,
+
+            avatar:
+              stored.avatar,
+
+            role:
+              stored.role,
+
+            permissions:
+              stored.permissions,
+          }
+        : {
+            accountId:
+              session.accountId,
+
+            provider:
+              session.provider,
+
+            email:
+              session.email,
+
+            username:
+              session.username,
+
+            displayName:
+              session.displayName,
+
+            avatar:
+              session.avatar,
+
+            role:
+              session.role,
+
+            permissions:
+              session.permissions,
+          };
+
     return NextResponse.json({
       success:
         true,
@@ -69,31 +128,8 @@ export async function GET() {
       authenticated:
         true,
 
-      user: {
-        accountId:
-          session.accountId,
-
-        provider:
-          session.provider,
-
-        email:
-          session.email,
-
-        username:
-          session.username,
-
-        displayName:
-          session.displayName,
-
-        avatar:
-          session.avatar,
-
-        role:
-          session.role,
-
-        permissions:
-          session.permissions,
-      },
+      user:
+        current,
     });
   } catch (error) {
     console.error(

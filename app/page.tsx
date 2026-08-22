@@ -287,6 +287,25 @@ function formatDate(timestamp: number) {
   );
 }
 
+type WebAccount = {
+  id: string;
+  email: string | null;
+  displayName: string;
+  username: string;
+  avatar: string | null;
+  provider:
+    | "discord"
+    | "google"
+    | "password";
+  role:
+    | "owner"
+    | "admin"
+    | "member";
+  permissions: string[];
+  createdAt: number;
+  updatedAt: number;
+};
+
 type AuthUser = {
   accountId: string;
   provider:
@@ -362,6 +381,22 @@ export default function Home() {
     authSubmitting,
     setAuthSubmitting,
   ] = useState(false);
+
+
+  const [
+    webAccounts,
+    setWebAccounts,
+  ] = useState<WebAccount[]>([]);
+
+  const [
+    webAccountsLoading,
+    setWebAccountsLoading,
+  ] = useState(false);
+
+  const [
+    webAccountSavingId,
+    setWebAccountSavingId,
+  ] = useState<string | null>(null);
 
   const [loading, setLoading] =
     useState(true);
@@ -706,6 +741,138 @@ export default function Home() {
       );
     } finally {
       setAuthSubmitting(false);
+    }
+  }
+
+  async function loadWebAccounts() {
+    if (
+      !authUser ||
+      authUser.role !== "owner"
+    ) {
+      setWebAccounts([]);
+      return;
+    }
+
+    setWebAccountsLoading(true);
+
+    try {
+      const response =
+        await fetch(
+          "/api/auth/users",
+          {
+            cache:
+              "no-store",
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !data?.success
+      ) {
+        throw new Error(
+          data?.message ||
+          "Accounts could not be loaded."
+        );
+      }
+
+      setWebAccounts(
+        Array.isArray(
+          data.users
+        )
+          ? data.users
+          : []
+      );
+    } catch (error) {
+      console.error(
+        error
+      );
+
+      showToast(
+        "Web accounts could not be loaded.",
+        "error"
+      );
+    } finally {
+      setWebAccountsLoading(false);
+    }
+  }
+
+  async function updateWebAccountRole(
+    accountId: string,
+    role:
+      | "admin"
+      | "member"
+  ) {
+    setWebAccountSavingId(
+      accountId
+    );
+
+    try {
+      const response =
+        await fetch(
+          "/api/auth/users",
+          {
+            method:
+              "PATCH",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                accountId,
+                role,
+              }),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !data?.success
+      ) {
+        throw new Error(
+          data?.message ||
+          "Role could not be changed."
+        );
+      }
+
+      setWebAccounts(
+        (current) =>
+          current.map(
+            (account) =>
+              account.id ===
+              accountId
+                ? data.user
+                : account
+          )
+      );
+
+      showToast(
+        role === "admin"
+          ? "Account promoted to ADMIN."
+          : "Account changed to MEMBER.",
+        "success"
+      );
+    } catch (error) {
+      console.error(
+        error
+      );
+
+      showToast(
+        "Account role could not be updated.",
+        "error"
+      );
+    } finally {
+      setWebAccountSavingId(
+        null
+      );
     }
   }
 
@@ -1345,6 +1512,18 @@ export default function Home() {
     authUser,
     visiblePages,
     activePage,
+  ]);
+
+  useEffect(() => {
+    if (
+      activePage === "Admins" &&
+      authUser?.role === "owner"
+    ) {
+      void loadWebAccounts();
+    }
+  }, [
+    activePage,
+    authUser?.role,
   ]);
 
   const filteredPlayers =
@@ -4828,6 +5007,191 @@ export default function Home() {
   function renderAdmins() {
     return (
       <div className="modulePage">
+        {authUser?.role === "owner" && (
+          <div className="largePanel webAccountsPanel">
+            <div className="panelHeading">
+              <div>
+                <span className="dashboardEyebrow">
+                  WEB ACCESS
+                </span>
+
+                <h2>
+                  Panel Accounts
+                </h2>
+
+                <p>
+                  Manage accounts created with Discord,
+                  Google or e-mail login.
+                </p>
+              </div>
+
+              <button
+                className="smallButton"
+                onClick={
+                  loadWebAccounts
+                }
+                disabled={
+                  webAccountsLoading
+                }
+              >
+                {webAccountsLoading
+                  ? "LOADING..."
+                  : "REFRESH"}
+              </button>
+            </div>
+
+            {webAccountsLoading &&
+            webAccounts.length === 0 ? (
+              <div className="panelMessage">
+                Loading accounts...
+              </div>
+            ) : webAccounts.length === 0 ? (
+              <div className="panelMessage">
+                No web accounts recorded yet.
+              </div>
+            ) : (
+              <div className="webAccountGrid">
+                {webAccounts.map(
+                  (account) => {
+                    const isOwner =
+                      account.role ===
+                      "owner";
+
+                    const saving =
+                      webAccountSavingId ===
+                      account.id;
+
+                    return (
+                      <article
+                        className="webAccountCard"
+                        key={
+                          account.id
+                        }
+                      >
+                        <div className="webAccountIdentity">
+                          {account.avatar ? (
+                            <img
+                              src={
+                                account.avatar
+                              }
+                              alt={
+                                account.displayName
+                              }
+                              className="webAccountAvatar"
+                            />
+                          ) : (
+                            <div className="webAccountAvatar webAccountAvatarFallback">
+                              {account.displayName
+                                .slice(0, 1)
+                                .toUpperCase()}
+                            </div>
+                          )}
+
+                          <div>
+                            <strong>
+                              {
+                                account.displayName
+                              }
+                            </strong>
+
+                            <span>
+                              {account.email ||
+                                account.username}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="webAccountMeta">
+                          <span
+                            className={
+                              `webRoleBadge ${account.role}`
+                            }
+                          >
+                            {account.role.toUpperCase()}
+                          </span>
+
+                          <span className="webProviderBadge">
+                            {account.provider.toUpperCase()}
+                          </span>
+                        </div>
+
+                        <div className="webAccountPermissions">
+                          {account.permissions.map(
+                            (permission) => (
+                              <span
+                                key={
+                                  permission
+                                }
+                              >
+                                {permission}
+                              </span>
+                            )
+                          )}
+                        </div>
+
+                        <div className="webAccountActions">
+                          {isOwner ? (
+                            <button
+                              className="webOwnerLocked"
+                              disabled
+                            >
+                              OWNER LOCKED
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                className={
+                                  account.role ===
+                                  "member"
+                                    ? "webRoleButton active"
+                                    : "webRoleButton"
+                                }
+                                disabled={
+                                  saving
+                                }
+                                onClick={() =>
+                                  void updateWebAccountRole(
+                                    account.id,
+                                    "member"
+                                  )
+                                }
+                              >
+                                MEMBER
+                              </button>
+
+                              <button
+                                className={
+                                  account.role ===
+                                  "admin"
+                                    ? "webRoleButton active"
+                                    : "webRoleButton"
+                                }
+                                disabled={
+                                  saving
+                                }
+                                onClick={() =>
+                                  void updateWebAccountRole(
+                                    account.id,
+                                    "admin"
+                                  )
+                                }
+                              >
+                                {saving
+                                  ? "SAVING..."
+                                  : "ADMIN"}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  }
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="largePanel">
           <div className="panelHeading">
             <div>

@@ -27,15 +27,14 @@ export type AuthSession = {
 
 export type StoredUser = {
   id: string;
-  email: string;
+  email: string | null;
   displayName: string;
   username: string;
   avatar: string | null;
   passwordHash?: string;
   googleSub?: string;
-  provider:
-    | "password"
-    | "google";
+  discordId?: string;
+  provider: AuthProvider;
   role: AuthRole;
   permissions: string[];
   createdAt: number;
@@ -168,6 +167,18 @@ function googleKey(
   );
 }
 
+function userKey(
+  id: string
+) {
+  return (
+    "santionv:auth:user:" +
+    id
+  );
+}
+
+const USER_IDS_KEY =
+  "santionv:auth:userids";
+
 export async function getUserByEmail(
   email: string
 ): Promise<StoredUser | null> {
@@ -195,7 +206,7 @@ export async function getUserByEmail(
 export async function getUserByGoogleSub(
   sub: string
 ): Promise<StoredUser | null> {
-  const email =
+  const id =
     await redisCommand<
       string | null
     >([
@@ -203,23 +214,199 @@ export async function getUserByGoogleSub(
       googleKey(sub),
     ]);
 
-  if (!email) {
+  if (!id) {
     return null;
   }
 
-  return getUserByEmail(
-    email
+  return getUserById(id);
+}
+
+export async function getUserById(
+  id: string
+): Promise<StoredUser | null> {
+  const direct =
+    await redisCommand<
+      string | null
+    >([
+      "GET",
+      userKey(id),
+    ]);
+
+  if (direct) {
+    try {
+      return JSON.parse(
+        direct
+      ) as StoredUser;
+    } catch {
+      // fallback below
+    }
+  }
+
+  /*
+    Compatibility for accounts created before the
+    user-id index was added.
+  */
+  const keys =
+    await redisCommand<
+      string[]
+    >([
+      "KEYS",
+      "santionv:auth:email:*",
+    ]);
+
+  if (!keys?.length) {
+    return null;
+  }
+
+  const values =
+    await redisCommand<
+      Array<string | null>
+    >([
+      "MGET",
+      ...keys,
+    ]);
+
+  for (const value of values) {
+    if (!value) {
+      continue;
+    }
+
+    try {
+      const user =
+        JSON.parse(
+          value
+        ) as StoredUser;
+
+      if (user.id === id) {
+        await saveUser(user);
+        return user;
+      }
+    } catch {
+      // ignore malformed records
+    }
+  }
+
+  return null;
+}
+
+export async function getAllUsers():
+  Promise<StoredUser[]> {
+  const ids =
+    await redisCommand<
+      string[]
+    >([
+      "SMEMBERS",
+      USER_IDS_KEY,
+    ]);
+
+  const users:
+    StoredUser[] = [];
+
+  if (ids?.length) {
+    const values =
+      await redisCommand<
+        Array<string | null>
+      >([
+        "MGET",
+        ...ids.map(userKey),
+      ]);
+
+    for (const value of values) {
+      if (!value) {
+        continue;
+      }
+
+      try {
+        users.push(
+          JSON.parse(
+            value
+          ) as StoredUser
+        );
+      } catch {
+        // ignore malformed records
+      }
+    }
+  }
+
+  /*
+    Add older email-based records that have not yet
+    been migrated into the user-id index.
+  */
+  const oldKeys =
+    await redisCommand<
+      string[]
+    >([
+      "KEYS",
+      "santionv:auth:email:*",
+    ]);
+
+  if (oldKeys?.length) {
+    const oldValues =
+      await redisCommand<
+        Array<string | null>
+      >([
+        "MGET",
+        ...oldKeys,
+      ]);
+
+    for (const value of oldValues) {
+      if (!value) {
+        continue;
+      }
+
+      try {
+        const user =
+          JSON.parse(
+            value
+          ) as StoredUser;
+
+        if (
+          !users.some(
+            (item) =>
+              item.id === user.id
+          )
+        ) {
+          users.push(user);
+          await saveUser(user);
+        }
+      } catch {
+        // ignore malformed records
+      }
+    }
+  }
+
+  return users.sort(
+    (a, b) =>
+      b.createdAt -
+      a.createdAt
   );
 }
 
 export async function saveUser(
   user: StoredUser
 ) {
+  const json =
+    JSON.stringify(user);
+
   await redisCommand([
     "SET",
-    emailKey(user.email),
-    JSON.stringify(user),
+    userKey(user.id),
+    json,
   ]);
+
+  await redisCommand([
+    "SADD",
+    USER_IDS_KEY,
+    user.id,
+  ]);
+
+  if (user.email) {
+    await redisCommand([
+      "SET",
+      emailKey(user.email),
+      json,
+    ]);
+  }
 
   if (user.googleSub) {
     await redisCommand([
@@ -227,7 +414,7 @@ export async function saveUser(
       googleKey(
         user.googleSub
       ),
-      user.email,
+      user.id,
     ]);
   }
 }
